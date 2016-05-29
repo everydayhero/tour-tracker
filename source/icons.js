@@ -3,7 +3,7 @@ import React from 'react'
 export const Pin = ({
   color = '#00a044',
   dotColor = 'white',
-  shadowColor = 'grey'
+  shadowColor = 'rgba(0, 0, 0, 0.125)'
 }) => (
   <div style={{
     transform: 'translate(0, -20%)',
@@ -12,7 +12,6 @@ export const Pin = ({
   }}>
     <div style={{
       background: shadowColor,
-      opacity: '0.5',
       borderRadius: '50%',
       height: '60%',
       width: '60%',
@@ -60,7 +59,7 @@ export const Checkerboard = ({ color = 'black' }) => (
   <div style={{
     ...checkerBoard(color),
     border: '2px solid white',
-    boxShadow: '1px 3px 0px 1px rgba(0, 0, 0, 0.25)',
+    boxShadow: '0 0 0 5px rgba(0, 0, 0, 0.125)',
     borderRadius: '100%',
     width: '100%',
     height: '100%'

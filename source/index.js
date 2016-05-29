@@ -175,10 +175,10 @@ class Map extends React.Component {
   }
 
   updateTourer (tourer, route = this.props.route) {
-    const point = calcTourerPosition(tourer.distance, route)
+    const { marker, popup = {}, distance } = tourer
+    const point = calcTourerPosition(distance, route)
     const icon = this.iconForTourer(tourer)
-    const marker = tourer.marker
-    marker.setPopupContent(tourer.popup)
+    marker.setPopupContent(popup.content)
     marker.setLatLng(point)
     marker.setIcon(icon)
     marker.tourer_id = tourer.id
@@ -201,15 +201,16 @@ class Map extends React.Component {
     })
   }
 
-  createTourer (tourer, route = this.props.route) {
-    const point = calcTourerPosition(tourer.distance, route)
+  createTourer (tourer = {}, route = this.props.route) {
+    const { distance, popup } = tourer
+    const point = calcTourerPosition(distance, route)
     const icon = this.iconForTourer(tourer)
     const marker = L.marker(point, { icon })
 
-    if (tourer.popup) {
+    if (popup) {
       marker.bindPopup(
-        tourer.popup,
-        { offset: L.point(0, -32), closeOnClick: false }
+        popup.content,
+        popup.options
       )
     }
 
@@ -268,7 +269,10 @@ Map.propTypes = {
     PropTypes.shape({
       id: PropTypes.string.isRequired,
       distance: PropTypes.number.isRequired,
-      popup: PropTypes.string,
+      popup: PropTypes.shape({
+        content: PropTypes.string,
+        options: PropTypes.object
+      }),
       icon: PropTypes.shape({
         iconSize: PropTypes.arrayOf(PropTypes.number),
         className: PropTypes.string,
