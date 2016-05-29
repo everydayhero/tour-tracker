@@ -40,7 +40,7 @@ const UNSELECTED_ICON = {
   iconSize: [30, 30],
   iconAnchor: [15, 30],
   className: '',
-  html: renderToStaticMarkup(<Pin color='seagreen' />)
+  html: renderToStaticMarkup(<Pin color='#00a044' />)
 }
 
 const assignIcon = (selected) => (tourer) => {

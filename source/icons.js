@@ -1,7 +1,7 @@
 import React from 'react'
 
 export const Pin = ({
-  color = 'coral',
+  color = '#00a044',
   dotColor = 'white',
   shadowColor = 'grey'
 }) => (

@@ -247,7 +247,7 @@ class Map extends React.Component {
 
   renderRoute (route) {
     const points = route.map((rp) => rp.point)
-    this._route = L.polyline(points).addTo(this._map)
+    this._route = L.polyline(points, this.props.routeStyle).addTo(this._map)
     this.renderStartAndFinish(points[0], points[points.length - 1])
     this._map.fitBounds(points, {
       padding: [50, 50]
@@ -280,10 +280,14 @@ Map.propTypes = {
 
 Map.defaultProps = {
   route: [],
+  routeStyle: {
+    color: '#7ec774'
+  },
   tourers: [],
   onSelection: () => {},
   onTourerDeselection: () => {},
-  tileUrl: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png'
+  tileUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}.jpg',
+  tileAttribution: '&copy; <a href="http://www.esri.com/">Esri</a>'
 }
 
 export default Map
