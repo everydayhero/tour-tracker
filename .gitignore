@@ -1,5 +1,5 @@
 node_modules
 npm-debug.log
-examples/build
+examples/build/*
 !examples/build/index.html
 
