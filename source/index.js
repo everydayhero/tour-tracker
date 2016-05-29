@@ -30,8 +30,8 @@ const findTourerRouteStartingDatum = (distance, routeData) => (
 )
 
 const calcTourerPosition = (distance, routeData) => {
-  const firstDatum = routeData[0]
-  const finalDatum = routeData[routeData.length - 1]
+  const firstDatum = routeData[0] || NullRouteDatum
+  const finalDatum = routeData[routeData.length - 1] || NullRouteDatum
   const routeTotal = finalDatum.totalDistance
 
   if (distance <= 0) return firstDatum.point
@@ -84,17 +84,17 @@ class Map extends React.Component {
 
   componentWillReceiveProps (nextProps) {
     const {
-      route: nextRoute,
-      tourers: nextTourers,
-      selected: nextSelected,
-      interactive = false
-    } = nextProps
-
-    const {
       route = [],
       tourers = [],
       selected
     } = this.props
+
+    const {
+      route: nextRoute,
+      tourers: nextTourers,
+      selected: nextSelected,
+      interactive = true
+    } = nextProps
 
     if (interactive) {
       this._map.dragging.enable()
@@ -186,7 +186,10 @@ class Map extends React.Component {
     return { ...tourer }
   }
 
-  updateTourers (nextTourers, route = this.props.route) {
+  updateTourers (
+    nextTourers = this.props.tourers,
+    route = this.props.route
+  ) {
     this._tourers = nextTourers.map((nextTourer) => {
       const existingTourer = find(this._tourers, (t) => t.id === nextTourer.id)
       if (!existingTourer) {
@@ -229,8 +232,9 @@ class Map extends React.Component {
 
   renderTourers () {
     const { tourers = [] } = this.props
-    this._map.addLayer(this._markers)
-    this._tourers = tourers.map(this.createTourer.bind(this))
+    this._tourers = tourers.map(
+      (tourer) => this.createTourer(tourer, this.props.route)
+    )
   }
 
   updateRoute (route, tourers) {
@@ -246,7 +250,7 @@ class Map extends React.Component {
     this._finishMarker = L.marker(finish, { icon: this._finishIcon }).addTo(this._map)
   }
 
-  renderRoute (route) {
+  renderRoute (route = []) {
     const points = route.map((rp) => rp.point)
     this._route = L.polyline(points, this.props.routeStyle).addTo(this._map)
     this.renderStartAndFinish(points[0], points[points.length - 1])

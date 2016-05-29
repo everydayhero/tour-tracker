@@ -1,72 +1,63 @@
 import React from 'react'
-import sinon from 'sinon'
 import chai, { expect } from 'chai'
 import chaiEnzyme from 'chai-enzyme'
-import { describe, before, after, it } from 'mocha'
-
+import jsdom from 'mocha-jsdom'
+import proxyquire from 'proxyquire'
+import sinon from 'sinon'
+import { describe, before, it } from 'mocha'
 import { mount } from 'enzyme'
 
 chai.use(chaiEnzyme())
 
-import Map from '../'
-
 const setLatLngSpy = sinon.spy()
-const leafletSetUp = () => {
-  global.L = {
-    map: sinon.spy(function () {
-      return {
-        addLayer () {},
-        dragging: { disable () {} },
-        touchZoom: { disable () {} },
-        doubleClickZoom: { disable () {} },
-        scrollWheelZoom: { disable () {} },
-        keyboard: { disable () {} },
-        on () {},
-        fitBounds () {}
-      }
-    }),
+const mocklet = {
+  map: sinon.spy(function () {
+    return {
+      addLayer () {},
+      dragging: { disable () {}, enable () {} },
+      touchZoom: { disable () {}, enable () {} },
+      doubleClickZoom: { disable () {}, enable () {} },
+      scrollWheelZoom: { disable () {}, enable () {} },
+      keyboard: { disable () {}, enable () {} },
+      on () {},
+      fitBounds () {}
+    }
+  }),
 
-    divIcon () {},
+  divIcon () {},
 
-    point () {},
+  point () {},
 
-    tileLayer () {
-      return {
-        addTo () {}
-      }
-    },
+  tileLayer () {
+    return {
+      addTo () {}
+    }
+  },
 
-    featureGroup () {
-      return {
-        addLayer () {}
-      }
-    },
+  featureGroup () {
+    return {
+      addLayer () {}
+    }
+  },
 
-    addLayer () {},
+  addLayer () {},
 
-    polyline () {
-      return {
-        addTo () {}
-      }
-    },
+  polyline () {
+    return {
+      addTo () {}
+    }
+  },
 
-    marker: sinon.spy(function () {
-      return {
-        bindPopup () { return this },
-        setIcon () {},
-        setLatLng: setLatLngSpy,
-        addTo () {},
-
-        _popup: {
-          setContent () {}
-        }
-      }
-    })
-  }
-}
-
-const leafletTearDown = () => {
-  global.L = undefined
+  marker: sinon.spy(function () {
+    return {
+      on () {},
+      bindPopup () { return this },
+      setIcon () {},
+      setLatLng: setLatLngSpy,
+      addTo () {},
+      setPopupContent () {}
+    }
+  })
 }
 
 const createSampleMap = (
@@ -75,9 +66,9 @@ const createSampleMap = (
     { point: [0, 50], totalDistance: 5560000 }
   ],
   tourers = [
-    { id: 1, distance_in_meters: 0 },
-    { id: 2, distance_in_meters: 2780000 },
-    { id: 3, distance_in_meters: 5560000 }
+    { id: '1', distance: 0 },
+    { id: '2', distance: 2780000 },
+    { id: '3', distance: 5560000 }
   ]
 ) => (
   mount(<Map
@@ -86,53 +77,53 @@ const createSampleMap = (
   />)
 )
 
-describe('Map', () => {
-  before(() => {
-    leafletSetUp()
-  })
+let Map
 
-  after(() => {
-    leafletTearDown()
+describe('Map', () => {
+  jsdom()
+
+  before(() => {
+    Map = proxyquire('../', { 'leaflet': mocklet }).default
   })
 
   it('creates a leaflet map on mount', () => {
     mount(<Map />)
-    expect(global.L.map.called).to.be.ok
+    expect(mocklet.map.called).to.be.ok
   })
 
   it('creates a leafter marker for each supplied tourer as well the start and finish points', () => {
-    global.L.marker.reset()
+    mocklet.marker.reset()
     createSampleMap()
-    expect(global.L.marker.callCount).to.eq(5)
+    expect(mocklet.marker.callCount).to.eq(5)
   })
 
   it('positions the start marker at the first route point', () => {
-    global.L.marker.reset()
+    mocklet.marker.reset()
     createSampleMap()
-    expect(global.L.marker.getCall(0).args[0]).to.eql([0, 0])
+    expect(mocklet.marker.getCall(0).args[0]).to.eql([0, 0])
   })
 
   it('positions the finish marker at the lasst route point', () => {
-    global.L.marker.reset()
+    mocklet.marker.reset()
     createSampleMap()
-    expect(global.L.marker.getCall(1).args[0]).to.eql([0, 50])
+    expect(mocklet.marker.getCall(1).args[0]).to.eql([0, 50])
   })
 
   it('positions the rider\'s markers according to how far along the route they are', () => {
-    global.L.marker.reset()
+    mocklet.marker.reset()
     createSampleMap()
-    expect(global.L.marker.getCall(2).args[0]).to.eql([0, 0])
-    expect(global.L.marker.getCall(3).args[0].map((n) => Math.round(n))).to.eql([0, 25])
-    expect(global.L.marker.getCall(4).args[0]).to.eql([0, 50])
+    expect(mocklet.marker.getCall(2).args[0]).to.eql([0, 0])
+    expect(mocklet.marker.getCall(3).args[0].map((n) => Math.round(n))).to.eql([0, 25])
+    expect(mocklet.marker.getCall(4).args[0]).to.eql([0, 50])
   })
 
   it('updates rider information as it\'s provided to props', () => {
     const map = createSampleMap()
     map.setProps({
       tourers: [
-        { id: 1, distance_in_meters: 2780000 },
-        { id: 2, distance_in_meters: 2780000 },
-        { id: 3, distance_in_meters: 5560000 }
+        { id: '1', distance: 2780000 },
+        { id: '2', distance: 2780000 },
+        { id: '3', distance: 5560000 }
       ]
     })
     expect(setLatLngSpy.getCall(0).args[0].map((n) => Math.round(n))).to.eql([0, 25])

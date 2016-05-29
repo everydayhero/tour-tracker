@@ -85,7 +85,6 @@ const popupCss = `
 const CustomPopup = ({
   waypoints = [],
   tourers = [],
-  selected = '',
   selectTourer
 }) => {
   const decoratedTourers = tourers.map(assignPopup)
@@ -101,7 +100,6 @@ const CustomPopup = ({
       <TourTracker
         tourers={decoratedTourers}
         waypoints={waypoints}
-        selected={selected}
       />
     </div>
   )
