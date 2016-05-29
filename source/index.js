@@ -1,9 +1,12 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import { renderToStaticMarkup } from 'react-dom/server'
 import L from 'leaflet'
 import find from 'lodash/find'
 import isEqual from 'lodash/isEqual'
 import sortBy from 'lodash/sortBy'
+
+import { Checkerboard, Pin } from './icons'
 
 const EARTHS_RADIUS_IN_METERS = 6371000
 const toRad = (value) => value * Math.PI / 180
@@ -56,21 +59,22 @@ const calcTourerPosition = (distance, routeData) => {
 }
 
 const defaultTourerIcon = {
-  iconSize: L.point(42, 42),
+  iconSize: L.point(30, 30),
+  iconAnchor: [15, 30],
   className: '',
-  html: '<div style="border-radius: 100%; background-color: red; width: 100%; height: 100%" />'
+  html: renderToStaticMarkup(<Pin color='seagreen' />)
 }
 
 const defaultStartIcon = {
-  iconSize: L.point(72, 72),
+  iconSize: L.point(30, 30),
   className: '',
-  html: '<div style="border-radius: 100%; background-color: green; width: 100%; height: 100%" />'
+  html: renderToStaticMarkup(<Checkerboard color='seagreen' />)
 }
 
 const defaultFinishIcon = {
-  iconSize: L.point(72, 72),
+  iconSize: L.point(30, 30),
   className: '',
-  html: '<div style="border-radius: 100%; background-color: lightgrey; width: 100%; height: 100%" />'
+  html: renderToStaticMarkup(<Checkerboard />)
 }
 
 class Map extends React.Component {

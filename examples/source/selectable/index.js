@@ -1,6 +1,7 @@
 import React from 'react'
 import logger from 'redux-logger'
 import thunk from 'redux-thunk'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { Provider } from 'react-redux'
 import { connect } from 'react-redux'
 import { createStore, applyMiddleware } from 'redux'
@@ -8,6 +9,7 @@ import { createStore, applyMiddleware } from 'redux'
 import createConnected from '../../../source/container'
 import reducer from '../../../source/reducer'
 import { selectTourer } from '../../../source/actions'
+import { Pin } from '../../../source/icons'
 
 const TourTracker = createConnected()
 
@@ -28,15 +30,17 @@ const TOURERS = [
 ]
 
 const SELECTED_ICON = {
-  iconSize: [32, 32],
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
   className: '',
-  html: '<div style="background-color: blue; width: 100%; height: 100%" />'
+  html: renderToStaticMarkup(<Pin color='coral' />)
 }
 
 const UNSELECTED_ICON = {
-  iconSize: [32, 32],
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
   className: '',
-  html: '<div style="background-color: grey; width: 100%; height: 100%" />'
+  html: renderToStaticMarkup(<Pin color='seagreen' />)
 }
 
 const assignIcon = (selected) => (tourer) => {
