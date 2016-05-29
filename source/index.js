@@ -55,25 +55,6 @@ const calcTourerPosition = (distance, routeData) => {
   return [toDeg(tourerLat), toDeg(tourerLon)]
 }
 
-const renderRoute = (map, points, style) => (
-  L.polyline(points, {
-    ...style,
-    opacity: 1,
-    weight: 5
-  }).addTo(map)
-)
-
-const renderStartAndFinish = (
-  start,
-  finish,
-  startIcon,
-  finishIcon,
-  map
-) => {
-  L.marker(start, { icon: startIcon }).addTo(map)
-  L.marker(finish, { icon: finishIcon }).addTo(map)
-}
-
 const defaultTourerIcon = {
   iconSize: L.point(42, 42),
   className: '',
@@ -99,12 +80,14 @@ class Map extends React.Component {
 
   componentWillReceiveProps (nextProps) {
     const {
+      route: nextRoute,
       tourers: nextTourers,
       selected: nextSelected,
       interactive = false
     } = nextProps
 
     const {
+      route = [],
       tourers = [],
       selected
     } = this.props
@@ -123,7 +106,9 @@ class Map extends React.Component {
       this._map.keyboard.disable()
     }
 
-    if (!isEqual(sortBy(tourers, (t) => t.id), sortBy(nextTourers, (t) => t.id))) {
+    if (!isEqual(route.map((r) => r.distance), nextRoute.map((r) => r.distance))) {
+      this.updateRoute(nextRoute, nextTourers)
+    } else if (!isEqual(sortBy(tourers, (t) => t.id), sortBy(nextTourers, (t) => t.id))) {
       this.updateTourers(nextTourers)
     }
 
@@ -144,26 +129,20 @@ class Map extends React.Component {
     this._startIcon = L.divIcon(defaultStartIcon)
     this._finishIcon = L.divIcon(defaultFinishIcon)
 
-    const routePoints = this.props.route.map(
-      (routeDatum) => routeDatum.point
-    )
-
-    this._map.fitBounds(routePoints, {
-      padding: [50, 50]
-    })
+    this._markers = L.featureGroup()
+    this._map.addLayer(this._markers)
 
     L.tileLayer(
       this.props.tileUrl,
       { attribution: this.props.tileAttribution }
     ).addTo(this._map)
 
-    renderRoute(this._map, routePoints, { color: '#FFF' })
-    renderStartAndFinish(routePoints[0], routePoints[routePoints.length - 1], this._startIcon, this._finishIcon, this._map)
-
-    this._markers = L.featureGroup()
-    this._map.addLayer(this._markers)
-
-    this.renderTourers()
+    if (this.props.route.length) {
+      this.renderRoute(this.props.route)
+      this.renderTourers()
+    } else {
+      this._map.fitBounds(this.props.waypoints)
+    }
   }
 
   openTourerPopup (marker) {
@@ -191,8 +170,8 @@ class Map extends React.Component {
     return L.divIcon(icon)
   }
 
-  updateTourer (tourer) {
-    const point = calcTourerPosition(tourer.distance, this.props.route)
+  updateTourer (tourer, route = this.props.route) {
+    const point = calcTourerPosition(tourer.distance, route)
     const icon = this.iconForTourer(tourer)
     const marker = tourer.marker
     marker.setPopupContent(tourer.popup)
@@ -203,23 +182,23 @@ class Map extends React.Component {
     return { ...tourer }
   }
 
-  updateTourers (nextTourers) {
+  updateTourers (nextTourers, route = this.props.route) {
     this._tourers = nextTourers.map((nextTourer) => {
       const existingTourer = find(this._tourers, (t) => t.id === nextTourer.id)
       if (!existingTourer) {
-        return this.createTourer(nextTourer)
+        return this.createTourer(nextTourer, route)
       } else {
         return this.updateTourer({
           ...existingTourer,
           ...nextTourer,
           marker: existingTourer.marker
-        })
+        }, route)
       }
     })
   }
 
-  createTourer (tourer) {
-    const point = calcTourerPosition(tourer.distance, this.props.route)
+  createTourer (tourer, route = this.props.route) {
+    const point = calcTourerPosition(tourer.distance, route)
     const icon = this.iconForTourer(tourer)
     const marker = L.marker(point, { icon })
 
@@ -245,7 +224,30 @@ class Map extends React.Component {
 
   renderTourers () {
     const { tourers = [] } = this.props
+    this._map.addLayer(this._markers)
     this._tourers = tourers.map(this.createTourer.bind(this))
+  }
+
+  updateRoute (route, tourers) {
+    this._route && this._map.removeLayer(this._route)
+    this._startMarker && this._map.removeLayer(this._startMarker)
+    this._finishMarker && this._map.removeLayer(this._finishMarker)
+    this.renderRoute(route)
+    this.updateTourers(tourers, route)
+  }
+
+  renderStartAndFinish (start, finish) {
+    this._startMarker = L.marker(start, { icon: this._startIcon }).addTo(this._map)
+    this._finishMarker = L.marker(finish, { icon: this._finishIcon }).addTo(this._map)
+  }
+
+  renderRoute (route) {
+    const points = route.map((rp) => rp.point)
+    this._route = L.polyline(points).addTo(this._map)
+    this.renderStartAndFinish(points[0], points[points.length - 1])
+    this._map.fitBounds(points, {
+      padding: [50, 50]
+    })
   }
 
   render () {
@@ -256,7 +258,8 @@ class Map extends React.Component {
 const { PropTypes } = React
 
 Map.propTypes = {
-  route: PropTypes.array.isRequired,
+  waypoints: PropTypes.array.isRequired,
+  route: PropTypes.array,
   tourers: PropTypes.arrayOf(
     PropTypes.shape({
       id: PropTypes.string.isRequired,
