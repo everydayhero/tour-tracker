@@ -1,12 +1,21 @@
 import React from 'react'
-import createConnected from '../../../source/container'
 import logger from 'redux-logger'
-import reducer from '../../../source/reducer'
 import thunk from 'redux-thunk'
 import { Provider } from 'react-redux'
 import { connect } from 'react-redux'
 import { createStore, applyMiddleware } from 'redux'
+
+import createConnected from '../../../source/container'
+import reducer from '../../../source/reducer'
 import { selectTourer } from '../../../source/actions'
+
+const TourTracker = createConnected()
+
+const store = createStore(
+  reducer,
+  {},
+  applyMiddleware(thunk, logger())
+)
 
 const WAYPOINTS = [
   [-27.465245, 153.028644],
@@ -18,13 +27,13 @@ const TOURERS = [
   { id: '2', distance: 2000000 }
 ]
 
-const selectedIcon = {
+const SELECTED_ICON = {
   iconSize: [32, 32],
   className: '',
   html: '<div style="background-color: blue; width: 100%; height: 100%" />'
 }
 
-const unselectedIcon = {
+const UNSELECTED_ICON = {
   iconSize: [32, 32],
   className: '',
   html: '<div style="background-color: grey; width: 100%; height: 100%" />'
@@ -34,23 +43,15 @@ const assignIcon = (selected) => (tourer) => {
   if (tourer.id === selected) {
     return ({
       ...tourer,
-      icon: selectedIcon
+      icon: SELECTED_ICON
     })
   } else {
     return ({
       ...tourer,
-      icon: unselectedIcon
+      icon: UNSELECTED_ICON
     })
   }
 }
-
-const store = createStore(
-  reducer,
-  {},
-  applyMiddleware(thunk, logger())
-)
-
-const TourTracker = createConnected()
 
 const mapDispatch = (dispatch) => ({
   selectTourer: (id) => dispatch(selectTourer(id))
