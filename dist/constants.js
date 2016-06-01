@@ -1,0 +1,9 @@
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var REQUEST_ROUTE = exports.REQUEST_ROUTE = 'REQUEST_ROUTE';
+var RECEIVE_ROUTE_SUCCESS = exports.RECEIVE_ROUTE_SUCCESS = 'RECEIVE_ROUTE_SUCCESS';
+var RECEIVE_ROUTE_FAILURE = exports.RECEIVE_ROUTE_FAILURE = 'RECEIVE_ROUTE_FAILURE';
+var SELECT_TOURER = exports.SELECT_TOURER = 'SELECT_TOURER';

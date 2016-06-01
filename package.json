@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "build": "babel --ignore=**/__tests__/*.js source -d dist",
     "dev": "webpack-dev-server --config examples/webpack.config.js --content-base examples/build",
     "test": "mocha source/__tests__/index.js --compilers js:babel-register"
   },
@@ -33,6 +34,7 @@
     "redux": "^3.5.2"
   },
   "devDependencies": {
+    "babel-cli": "^6.9.0",
     "babel-loader": "^6.2.4",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-react": "^6.5.0",
