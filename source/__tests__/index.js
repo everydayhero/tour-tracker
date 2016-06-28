@@ -186,4 +186,44 @@ describe('Map', () => {
       lng: 50
     })
   })
+
+  it('can plot a rider along multiple route-segments', () => {
+    mocklet.marker.reset()
+    createSampleMap(
+      [
+        {
+          waypoints: [
+            [0, 0],
+            [0, 50]
+          ],
+          points: [
+            { lat: 0, lng: 0, distance: 0, bearing: 90 },
+            { lat: 0, lng: 50, distance: 5560000 }
+          ]
+        },
+        {
+          waypoints: [
+            [0, 100],
+            [0, 150]
+          ],
+          points: [
+            { lat: 0, lng: 100, distance: 0, bearing: 90 },
+            { lat: 0, lng: 150, distance: 5560000 }
+          ]
+        }
+      ],
+      [
+        { id: '1', distance: 8340000 }
+      ]
+    )
+
+    const point = mocklet.marker.getCall(2).args[0]
+    expect({
+      lat: Math.round(point.lat),
+      lng: Math.round(point.lng)
+    }).to.eql({
+      lat: 0,
+      lng: 125
+    })
+  })
 })
