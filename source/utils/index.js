@@ -1,12 +1,12 @@
 import axios from 'axios'
 import { decode } from 'polyline'
+import { EARTHS_RADIUS_IN_METERS } from '../constants'
 
-const EARTHS_RADIUS_IN_METERS = 6371000
+export const toRad = (value) => (value * Math.PI / 180)
+export const toDeg = (value) => (value / Math.PI * 180)
 
-const last = (arr) => arr[arr.length - 1]
-
-const toRad = (value) => (value * Math.PI / 180)
-const toDeg = (value) => (value / Math.PI * 180)
+export const first = (arr = []) => arr.slice(0)[0]
+export const last = (arr = []) => arr.slice(0)[arr.length - 1]
 
 const calcBearing = (
   [latA, lonA],
