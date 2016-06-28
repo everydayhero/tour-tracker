@@ -1,12 +1,12 @@
 import axios from 'axios'
 import { decode } from 'polyline'
+import { EARTHS_RADIUS_IN_METERS } from '../constants'
 
-const EARTHS_RADIUS_IN_METERS = 6371000
+export const toRad = (value) => (value * Math.PI / 180)
+export const toDeg = (value) => (value / Math.PI * 180)
 
-const last = (arr) => arr[arr.length - 1]
-
-const toRad = (value) => (value * Math.PI / 180)
-const toDeg = (value) => (value / Math.PI * 180)
+export const first = (arr = []) => arr.slice(0)[0]
+export const last = (arr = []) => arr.slice(0)[arr.length - 1]
 
 const calcBearing = (
   [latA, lonA],
@@ -42,22 +42,23 @@ const calcDistance = (
   ) * EARTHS_RADIUS_IN_METERS
 }
 
-const decoratePoint = (point, previous, next) => ({
-  point,
-  distance: calcDistance(previous, point),
-  bearing: calcBearing(point, next)
-})
+const decoratePoint = (prevDistance, point, prev, next) => {
+  const [lat, lng] = point
+
+  return {
+    lat,
+    lng,
+    distance: prevDistance + calcDistance(prev, point),
+    bearing: calcBearing(point, next)
+  }
+}
 
 const pointToDecimal = ([x, y]) => (
   [x / 10, y / 10]
 )
 
-const currentTotal = (points) => (
-  (last(points) || { totalDistance: 0 }).totalDistance
-)
-
 const decoratePoints = (
-  decoratedPoints,
+  decorated,
   point,
   index,
   points
@@ -65,29 +66,21 @@ const decoratePoints = (
   const prev = points[index - 1] || point
   const next = points[index + 1] || point
 
-  const decorated = decoratePoint(
-    pointToDecimal(point),
-    pointToDecimal(prev),
-    pointToDecimal(next)
-  )
-
-  const totalDistance = currentTotal(
-    decoratedPoints
-  ) + decorated.distance
+  const prevDistance = (last(decorated) || { distance: 0 }).distance
 
   return [
-    ...decoratedPoints,
-    {
-      ...decorated,
-      totalDistance
-    }
+    ...decorated,
+    decoratePoint(
+      prevDistance,
+      pointToDecimal(point),
+      pointToDecimal(prev),
+      pointToDecimal(next)
+    )
   ]
 }
 
-const transformResponse = ({
-  route_geometry = ''
-} = {}) => (
-  decode(route_geometry).reduce(decoratePoints, [])
+const polylineToPoints = (routeGeometry = '') => (
+  decode(routeGeometry).reduce(decoratePoints, [])
 )
 
 const buildQuery = ({
@@ -115,6 +108,6 @@ export const findRoute = ({
   axios(
     buildUrl({ waypoints, zoom })
   ).then(
-    ({ data }) => transformResponse(data)
+    ({ data }) => polylineToPoints(data.route_geometry)
   )
 )

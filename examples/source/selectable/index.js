@@ -2,8 +2,7 @@ import React from 'react'
 import logger from 'redux-logger'
 import thunk from 'redux-thunk'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { Provider } from 'react-redux'
-import { connect } from 'react-redux'
+import { Provider, connect } from 'react-redux'
 import { createStore, applyMiddleware } from 'redux'
 
 import createConnected from '../../../source/container'
@@ -12,12 +11,6 @@ import { selectTourer } from '../../../source/actions'
 import { Pin } from '../../../source/icons'
 
 const TourTracker = createConnected()
-
-const store = createStore(
-  reducer,
-  {},
-  applyMiddleware(thunk, logger())
-)
 
 const WAYPOINTS = [
   [-27.465245, 153.028644],
@@ -28,6 +21,18 @@ const TOURERS = [
   { id: '1', distance: 1000000 },
   { id: '2', distance: 2000000 }
 ]
+
+const INITIAL_STATE = {
+  routes: [
+    { waypoints: WAYPOINTS }
+  ]
+}
+
+const store = createStore(
+  reducer,
+  INITIAL_STATE,
+  applyMiddleware(thunk, logger())
+)
 
 const SELECTED_ICON = {
   iconSize: [30, 30],
@@ -63,7 +68,6 @@ const mapDispatch = (dispatch) => ({
 const mapState = ({ selected }) => ({ selected })
 
 const Selectable = ({
-  waypoints = [],
   tourers = [],
   selected = '',
   selectTourer
@@ -74,7 +78,6 @@ const Selectable = ({
     <div style={{ width: '100%', height: '100%' }}>
       <TourTracker
         tourers={decoratedTourers}
-        waypoints={waypoints}
         selected={selected}
       />
       <select
@@ -100,7 +103,6 @@ const Example = connect(
 export default () => (
   <Provider store={store}>
     <Example
-      waypoints={WAYPOINTS}
       tourers={TOURERS}
     />
   </Provider>

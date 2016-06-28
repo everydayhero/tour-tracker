@@ -4,30 +4,27 @@ import { connect } from 'react-redux'
 import { fetchRoute, selectTourer } from './actions'
 
 const defaultMapDispatch = (dispatch) => ({
-  fetchRoute: (waypoints) => dispatch(fetchRoute(waypoints)),
+  fetchRoute: (index, route) => dispatch(fetchRoute(index, route)),
   selectTourer: (id) => dispatch(selectTourer(id))
 })
 
 const defaultMapState = ({
-  route,
-  selected,
+  routes = [],
   interactive
 }) => ({
-  route,
-  selected,
+  routes,
   interactive
 })
 
 class Container extends React.Component {
   componentDidMount () {
-    const { fetchRoute, waypoints } = this.props
-    fetchRoute(waypoints)
+    const { fetchRoute, routes } = this.props
+    routes.forEach(({ waypoints }, index) => fetchRoute(index, waypoints))
   }
 
   render () {
     const {
-      waypoints = [],
-      route = [],
+      routes = [],
       tourers = [],
       selected = '',
       interactive = true,
@@ -36,8 +33,7 @@ class Container extends React.Component {
 
     return (
       <TourTracker
-        waypoints={waypoints}
-        route={route}
+        routes={routes}
         tourers={tourers}
         selected={selected}
         interactive={interactive}

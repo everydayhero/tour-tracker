@@ -1,4 +1,5 @@
 import React from 'react'
+import logger from 'redux-logger'
 import thunk from 'redux-thunk'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { Provider } from 'react-redux'
@@ -9,12 +10,6 @@ import reducer from '../../../source/reducer'
 
 const TourTracker = createConnected()
 
-const store = createStore(
-  reducer,
-  {},
-  applyMiddleware(thunk)
-)
-
 const WAYPOINTS = [
   [-27.465245, 153.028644],
   [-31.953573, 115.857006]
@@ -22,8 +17,20 @@ const WAYPOINTS = [
 
 const TOURERS = [
   { id: '1', distance: 1000000, data: { name: 'Billy' } },
-  { id: '2', distance: 2000000, data: { name: 'Bob' } }
+  { id: '2', distance: 2000000, data: { name: 'Bob' }}
 ]
+
+const INITIAL_STATE = {
+  routes: [
+    { waypoints: WAYPOINTS }
+  ]
+}
+
+const store = createStore(
+  reducer,
+  INITIAL_STATE,
+  applyMiddleware(thunk, logger())
+)
 
 const Popup = ({ name }) => (
   <h1>{name}</h1>
@@ -83,7 +90,6 @@ const popupCss = `
 `
 
 const CustomPopup = ({
-  waypoints = [],
   tourers = [],
   selectTourer
 }) => {
@@ -99,7 +105,6 @@ const CustomPopup = ({
       </style>
       <TourTracker
         tourers={decoratedTourers}
-        waypoints={waypoints}
       />
     </div>
   )
@@ -108,7 +113,6 @@ const CustomPopup = ({
 export default () => (
   <Provider store={store}>
     <CustomPopup
-      waypoints={WAYPOINTS}
       tourers={TOURERS}
     />
   </Provider>
