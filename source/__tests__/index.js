@@ -61,9 +61,17 @@ const mocklet = {
 }
 
 const createSampleMap = (
-  route = [
-    { point: [0, 0], totalDistance: 0, bearing: 90 },
-    { point: [0, 50], totalDistance: 5560000 }
+  routes = [
+    {
+      waypoints: [
+        [0, 0],
+        [0, 50]
+      ],
+      points: [
+        { lat: 0, lng: 0, distance: 0, bearing: 90 },
+        { lat: 0, lng: 50, distance: 5560000 }
+      ]
+    }
   ],
   tourers = [
     { id: '1', distance: 0 },
@@ -72,7 +80,7 @@ const createSampleMap = (
   ]
 ) => (
   mount(<Map
-    route={route}
+    routes={routes}
     tourers={tourers}
   />)
 )
@@ -112,13 +120,38 @@ describe('Map', () => {
   it('positions the rider\'s markers according to how far along the route they are', () => {
     mocklet.marker.reset()
     createSampleMap()
-    expect(mocklet.marker.getCall(2).args[0]).to.eql([0, 0])
-    expect(mocklet.marker.getCall(3).args[0].map((n) => Math.round(n))).to.eql([0, 25])
-    expect(mocklet.marker.getCall(4).args[0]).to.eql([0, 50])
+
+    const first = mocklet.marker.getCall(2).args[0]
+    const second = mocklet.marker.getCall(3).args[0]
+    const third = mocklet.marker.getCall(4).args[0]
+
+    expect({
+      lat: first.lat,
+      lng: first.lng
+    }).to.eql({
+      lat: 0,
+      lng: 0
+    })
+    expect({
+      lat: Math.round(second.lat),
+      lng: Math.round(second.lng)
+    }).to.eql({
+      lat: 0,
+      lng: 25
+    })
+    expect({
+      lat: third.lat,
+      lng: third.lng
+    }).to.eql({
+      lat: 0,
+      lng: 50
+    })
   })
 
   it('updates rider information as it\'s provided to props', () => {
     const map = createSampleMap()
+    setLatLngSpy.reset()
+
     map.setProps({
       tourers: [
         { id: '1', distance: 2780000 },
@@ -126,8 +159,31 @@ describe('Map', () => {
         { id: '3', distance: 5560000 }
       ]
     })
-    expect(setLatLngSpy.getCall(0).args[0].map((n) => Math.round(n))).to.eql([0, 25])
-    expect(setLatLngSpy.getCall(1).args[0].map((n) => Math.round(n))).to.eql([0, 25])
-    expect(setLatLngSpy.getCall(2).args[0]).to.eql([0, 50])
+
+    const first = setLatLngSpy.getCall(0).args[0]
+    const second = setLatLngSpy.getCall(1).args[0]
+    const third = setLatLngSpy.getCall(2).args[0]
+
+    expect({
+      lat: Math.round(first.lat),
+      lng: Math.round(first.lng)
+    }).to.eql({
+      lat: 0,
+      lng: 25
+    })
+    expect({
+      lat: Math.round(second.lat),
+      lng: Math.round(second.lng)
+    }).to.eql({
+      lat: 0,
+      lng: 25
+    })
+    expect({
+      lat: third.lat,
+      lng: third.lng
+    }).to.eql({
+      lat: 0,
+      lng: 50
+    })
   })
 })
