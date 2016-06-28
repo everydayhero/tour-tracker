@@ -5,21 +5,25 @@ import {
   SELECT_TOURER
 } from '../constants'
 
-const fetchRoute = (state) => ({
+const updateItem = (collection, index, attributes) => ([
+  ...collection.slice(0, index),
+  { ...collection[index], ...attributes },
+  ...collection.slice(index + 1)
+])
+
+const requestRoute = (state, { index }) => ({
   ...state,
-  status: 'fetching'
+  routes: updateItem(state.routes, index, { status: 'fetching' })
 })
 
-const receiveRouteFailure = (state, { error }) => ({
+const receiveRouteFailure = (state, { index, error }) => ({
   ...state,
-  status: 'failed',
-  error
+  routes: updateItem(state.routes, index, { status: 'failed', error })
 })
 
-const receiveRouteSuccess = (state, { route }) => ({
+const receiveRouteSuccess = (state, { index, points }) => ({
   ...state,
-  status: 'fetched',
-  route
+  routes: updateItem(state.routes, index, { status: 'fetched', error: '', points })
 })
 
 const selectTourer = (state, { id }) => ({
@@ -30,7 +34,7 @@ const selectTourer = (state, { id }) => ({
 export default (state, { type, payload }) => {
   switch (type) {
     case REQUEST_ROUTE:
-      return fetchRoute(state)
+      return requestRoute(state, payload)
     case RECEIVE_ROUTE_FAILURE:
       return receiveRouteFailure(state, payload)
     case RECEIVE_ROUTE_SUCCESS:

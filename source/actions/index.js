@@ -6,31 +6,33 @@ import {
   SELECT_TOURER
 } from '../constants'
 
-const requestRoute = () => ({
-  type: REQUEST_ROUTE
+const requestRoute = (index) => ({
+  type: REQUEST_ROUTE,
+  payload: { index }
 })
 
-const receiveRouteSuccess = (route) => ({
+const receiveRouteSuccess = (index, points) => ({
   type: RECEIVE_ROUTE_SUCCESS,
-  payload: { route }
+  payload: { index, points }
 })
 
-const receiveRouteFailure = (error) => ({
+const receiveRouteFailure = (index, error) => ({
   type: RECEIVE_ROUTE_FAILURE,
-  payload: { error }
+  payload: { index, error }
 })
+
+export const fetchRoute = (index, waypoints) => (dispatch) => {
+  dispatch(requestRoute(index))
+
+  return findRoute({ waypoints }).then((points) => (
+    dispatch(receiveRouteSuccess(index, points))
+  )).catch((error) => (
+    dispatch(receiveRouteFailure(index, error))
+  ))
+}
 
 export const selectTourer = (id) => ({
   type: SELECT_TOURER,
   payload: { id }
 })
 
-export const fetchRoute = (waypoints) => (dispatch) => {
-  dispatch(requestRoute())
-
-  return findRoute({ waypoints }).then(
-    (route) => dispatch(receiveRouteSuccess(route))
-  ).catch(
-    (error) => dispatch(receiveRouteFailure(error))
-  )
-}
