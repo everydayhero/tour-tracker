@@ -31,7 +31,7 @@ const selectTourer = (state, { id }) => ({
   selected: id
 })
 
-export default (state, { type, payload }) => {
+export default (state = {}, { type, payload }) => {
   switch (type) {
     case REQUEST_ROUTE:
       return requestRoute(state, payload)
