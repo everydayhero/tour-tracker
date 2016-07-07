@@ -1,7 +1,6 @@
 import React, { PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 import { renderToStaticMarkup } from 'react-dom/server'
-import L from 'leaflet'
 import find from 'lodash/find'
 
 import { Checkerboard, Pin } from './icons'
@@ -57,21 +56,25 @@ const calcTourerPosition = (distance, points) => {
   }
 }
 
+const canRenderRoutes = (routes = []) => (
+  routes.every((r) => (r.points || []).length)
+)
+
 const defaultTourerIcon = {
-  iconSize: L.point(30, 30),
+  iconSize: [30, 30],
   iconAnchor: [15, 30],
   className: '',
   html: renderToStaticMarkup(<Pin color='seagreen' />)
 }
 
 const defaultStartIcon = {
-  iconSize: L.point(30, 30),
+  iconSize: [30, 30],
   className: '',
   html: renderToStaticMarkup(<Checkerboard color='seagreen' />)
 }
 
 const defaultFinishIcon = {
-  iconSize: L.point(30, 30),
+  iconSize: [30, 30],
   className: '',
   html: renderToStaticMarkup(<Checkerboard />)
 }
@@ -86,72 +89,76 @@ class Map extends React.Component {
   }
 
   componentWillReceiveProps (nextProps) {
-    const {
-      routes = [],
-      tourers = [],
-      selected
-    } = this.props
+    if (global.L) {
+      const {
+        routes = [],
+        tourers = [],
+        selected
+      } = this.props
 
-    const {
-      routes: nextRoutes,
-      tourers: nextTourers,
-      selected: nextSelected,
-      interactive = true
-    } = nextProps
+      const {
+        routes: nextRoutes,
+        tourers: nextTourers,
+        selected: nextSelected,
+        interactive = true
+      } = nextProps
 
-    if (interactive) {
-      this._map.dragging.enable()
-      this._map.touchZoom.enable()
-      this._map.doubleClickZoom.enable()
-      this._map.scrollWheelZoom.enable()
-      this._map.keyboard.enable()
-    } else {
-      this._map.dragging.disable()
-      this._map.touchZoom.disable()
-      this._map.doubleClickZoom.disable()
-      this._map.scrollWheelZoom.disable()
-      this._map.keyboard.disable()
-    }
+      if (interactive) {
+        this._map.dragging.enable()
+        this._map.touchZoom.enable()
+        this._map.doubleClickZoom.enable()
+        this._map.scrollWheelZoom.enable()
+        this._map.keyboard.enable()
+      } else {
+        this._map.dragging.disable()
+        this._map.touchZoom.disable()
+        this._map.doubleClickZoom.disable()
+        this._map.scrollWheelZoom.disable()
+        this._map.keyboard.disable()
+      }
 
-    if (routes !== nextRoutes) {
-      this.updateRoutes(nextRoutes, nextTourers)
-    } else if (tourers !== nextTourers) {
-      this.updateTourers(nextTourers)
-    }
+      if (routes !== nextRoutes && canRenderRoutes(nextRoutes)) {
+        this.updateRoutes(nextRoutes, nextTourers)
+      } else if (tourers !== nextTourers) {
+        this.updateTourers(nextTourers)
+      }
 
-    if (nextSelected === null) {
-      const tourer = find(this._tourers, (t) => t.id === selected)
-      tourer && tourer.marker.closePopup()
-    } else {
-      const tourer = find(this._tourers, (t) => t.id === nextSelected)
-      tourer && tourer.marker.openPopup()
+      if (nextSelected === null) {
+        const tourer = find(this._tourers, (t) => t.id === selected)
+        tourer && tourer.marker.closePopup()
+      } else {
+        const tourer = find(this._tourers, (t) => t.id === nextSelected)
+        tourer && tourer.marker.openPopup()
+      }
     }
   }
 
   componentDidMount () {
-    this._map = L.map(ReactDOM.findDOMNode(this))
+    if (global.L) {
+      this._map = global.L.map(ReactDOM.findDOMNode(this))
 
-    this._map.on('popupopen', this.handlePopupOpen.bind(this))
+      this._map.on('popupopen', this.handlePopupOpen.bind(this))
 
-    this._startIcon = L.divIcon(defaultStartIcon)
-    this._finishIcon = L.divIcon(defaultFinishIcon)
+      this._startIcon = global.L.divIcon(defaultStartIcon)
+      this._finishIcon = global.L.divIcon(defaultFinishIcon)
 
-    this._markers = L.featureGroup()
-    this._map.addLayer(this._markers)
+      this._markers = global.L.featureGroup()
+      this._map.addLayer(this._markers)
 
-    L.tileLayer(
-      this.props.tileUrl,
-      { attribution: this.props.tileAttribution }
-    ).addTo(this._map)
+      global.L.tileLayer(
+        this.props.tileUrl,
+        { attribution: this.props.tileAttribution }
+      ).addTo(this._map)
 
-    this._map.fitBounds([
-      first((first(this.props.routes) || {}).waypoints),
-      last((last(this.props.routes) || {}).waypoints)
-    ], { padding: [50, 50] })
+      this._map.fitBounds([
+        first((first(this.props.routes) || {}).waypoints),
+        last((last(this.props.routes) || {}).waypoints)
+      ], { padding: [50, 50] })
 
-    if (this.props.routes.every((r) => (r.points || []).length)) {
-      this.renderRoutes(this.props.routes)
-      this.createTourers()
+      if (canRenderRoutes(this.props.routes)) {
+        this.renderRoutes(this.props.routes)
+        this.createTourers()
+      }
     }
   }
 
@@ -177,7 +184,7 @@ class Map extends React.Component {
   }
 
   iconForTourer ({ icon = defaultTourerIcon }) {
-    return L.divIcon(icon)
+    return global.L.divIcon(icon)
   }
 
   updateTourer (tourer, points = []) {
@@ -221,7 +228,7 @@ class Map extends React.Component {
     const { distance, popup } = tourer
     const point = calcTourerPosition(distance, points)
     const icon = this.iconForTourer(tourer)
-    const marker = L.marker(point, { icon })
+    const marker = global.L.marker(point, { icon })
 
     if (popup) {
       marker.bindPopup(
@@ -268,8 +275,8 @@ class Map extends React.Component {
   }
 
   renderStartAndFinish (start, finish) {
-    this._startMarker = L.marker(start, { icon: this._startIcon }).addTo(this._map)
-    this._finishMarker = L.marker(finish, { icon: this._finishIcon }).addTo(this._map)
+    this._startMarker = global.L.marker(start, { icon: this._startIcon }).addTo(this._map)
+    this._finishMarker = global.L.marker(finish, { icon: this._finishIcon }).addTo(this._map)
   }
 
   renderRoutes (routes = []) {
@@ -286,7 +293,7 @@ class Map extends React.Component {
     style = defaultSegmentStyle,
     points = []
   }) {
-    return L.polyline(points, style).addTo(this._map)
+    return global.L.polyline(points, style).addTo(this._map)
   }
 
   render () {
