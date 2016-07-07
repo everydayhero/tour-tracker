@@ -52,6 +52,7 @@
     "react-addons-test-utils": "^15.1.0",
     "react-router": "^2.4.1",
     "redux-logger": "^2.6.1",
+    "redux-thunk": "^2.1.0",
     "sinon": "^1.17.4",
     "testling": "^1.7.1",
     "webpack": "^1.13.1",
