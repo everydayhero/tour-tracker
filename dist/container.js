@@ -28,8 +28,8 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 var defaultMapDispatch = function defaultMapDispatch(dispatch) {
   return {
-    fetchRoute: function fetchRoute(waypoints) {
-      return dispatch((0, _actions.fetchRoute)(waypoints));
+    fetchRoute: function fetchRoute(index, route) {
+      return dispatch((0, _actions.fetchRoute)(index, route));
     },
     selectTourer: function selectTourer(id) {
       return dispatch((0, _actions.selectTourer)(id));
@@ -38,12 +38,11 @@ var defaultMapDispatch = function defaultMapDispatch(dispatch) {
 };
 
 var defaultMapState = function defaultMapState(_ref) {
-  var route = _ref.route;
-  var selected = _ref.selected;
+  var _ref$routes = _ref.routes;
+  var routes = _ref$routes === undefined ? [] : _ref$routes;
   var interactive = _ref.interactive;
   return {
-    route: route,
-    selected: selected,
+    routes: routes,
     interactive: interactive
   };
 };
@@ -62,18 +61,19 @@ var Container = function (_React$Component) {
     value: function componentDidMount() {
       var _props = this.props;
       var fetchRoute = _props.fetchRoute;
-      var waypoints = _props.waypoints;
+      var routes = _props.routes;
 
-      fetchRoute(waypoints);
+      routes.forEach(function (_ref2, index) {
+        var waypoints = _ref2.waypoints;
+        return fetchRoute(index, waypoints);
+      });
     }
   }, {
     key: 'render',
     value: function render() {
       var _props2 = this.props;
-      var _props2$waypoints = _props2.waypoints;
-      var waypoints = _props2$waypoints === undefined ? [] : _props2$waypoints;
-      var _props2$route = _props2.route;
-      var route = _props2$route === undefined ? [] : _props2$route;
+      var _props2$routes = _props2.routes;
+      var routes = _props2$routes === undefined ? [] : _props2$routes;
       var _props2$tourers = _props2.tourers;
       var tourers = _props2$tourers === undefined ? [] : _props2$tourers;
       var _props2$selected = _props2.selected;
@@ -84,8 +84,7 @@ var Container = function (_React$Component) {
 
 
       return _react2.default.createElement(_2.default, {
-        waypoints: waypoints,
-        route: route,
+        routes: routes,
         tourers: tourers,
         selected: selected,
         interactive: interactive,
@@ -98,11 +97,11 @@ var Container = function (_React$Component) {
 }(_react2.default.Component);
 
 exports.default = function () {
-  var _ref2 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+  var _ref3 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-  var _ref2$mapState = _ref2.mapState;
-  var mapState = _ref2$mapState === undefined ? defaultMapState : _ref2$mapState;
-  var _ref2$mapDispatch = _ref2.mapDispatch;
-  var mapDispatch = _ref2$mapDispatch === undefined ? defaultMapDispatch : _ref2$mapDispatch;
+  var _ref3$mapState = _ref3.mapState;
+  var mapState = _ref3$mapState === undefined ? defaultMapState : _ref3$mapState;
+  var _ref3$mapDispatch = _ref3.mapDispatch;
+  var mapDispatch = _ref3$mapDispatch === undefined ? defaultMapDispatch : _ref3$mapDispatch;
   return (0, _reactRedux.connect)(mapState, mapDispatch)(Container);
 };
