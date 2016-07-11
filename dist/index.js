@@ -155,7 +155,7 @@ var Map = function (_React$Component) {
 
           if (routes !== nextRoutes && canRenderRoutes(nextRoutes)) {
             _this2.updateRoutes(nextRoutes, nextTourers);
-          } else if (tourers !== nextTourers) {
+          } else if (tourers !== nextTourers && canRenderRoutes(nextRoutes || routes)) {
             _this2.updateTourers(nextTourers);
           }
 
