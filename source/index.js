@@ -119,7 +119,7 @@ class Map extends React.Component {
 
       if (routes !== nextRoutes && canRenderRoutes(nextRoutes)) {
         this.updateRoutes(nextRoutes, nextTourers)
-      } else if (tourers !== nextTourers) {
+      } else if (tourers !== nextTourers && canRenderRoutes(nextRoutes || routes)) {
         this.updateTourers(nextTourers)
       }
 
