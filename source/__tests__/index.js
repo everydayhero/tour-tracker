@@ -2,10 +2,10 @@ import React from 'react'
 import chai, { expect } from 'chai'
 import chaiEnzyme from 'chai-enzyme'
 import jsdom from 'mocha-jsdom'
-import proxyquire from 'proxyquire'
 import sinon from 'sinon'
-import { describe, before, it } from 'mocha'
+import { describe, after, it } from 'mocha'
 import { mount } from 'enzyme'
+import Map from '../'
 
 chai.use(chaiEnzyme())
 
@@ -85,13 +85,14 @@ const createSampleMap = (
   />)
 )
 
-let Map
+const initialL = global.L
+global.L = mocklet
 
 describe('Map', () => {
   jsdom()
 
-  before(() => {
-    Map = proxyquire('../', { 'leaflet': mocklet }).default
+  after(() => {
+    global.L = initialL
   })
 
   it('creates a leaflet map on mount', () => {
