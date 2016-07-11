@@ -1,3 +1,5 @@
+import './vendor-globals'
+
 import React from 'react'
 import { Router, Route, IndexRoute, Link, browserHistory } from 'react-router'
 import { render } from 'react-dom'
