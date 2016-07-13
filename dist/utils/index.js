@@ -83,12 +83,14 @@ var decoratePoint = function decoratePoint(prevDistance, point, prev, next) {
   var lat = _point[0];
   var lng = _point[1];
 
+  var distance = prev ? prevDistance + calcDistance(prev, point) : 0;
+  var bearing = next ? calcBearing(point, next) : 0;
 
   return {
     lat: lat,
     lng: lng,
-    distance: prevDistance + calcDistance(prev, point),
-    bearing: calcBearing(point, next)
+    distance: distance,
+    bearing: bearing
   };
 };
 
@@ -101,12 +103,12 @@ var pointToDecimal = function pointToDecimal(_ref9) {
 };
 
 var decoratePoints = function decoratePoints(decorated, point, index, points) {
-  var prev = points[index - 1] || point;
-  var next = points[index + 1] || point;
+  var prev = points[index - 1];
+  var next = points[index + 1];
 
   var prevDistance = (last(decorated) || { distance: 0 }).distance;
 
-  return [].concat(_toConsumableArray(decorated), [decoratePoint(prevDistance, pointToDecimal(point), pointToDecimal(prev), pointToDecimal(next))]);
+  return [].concat(_toConsumableArray(decorated), [decoratePoint(prevDistance, pointToDecimal(point), prev && pointToDecimal(prev), next && pointToDecimal(next))]);
 };
 
 var polylineToPoints = function polylineToPoints() {
