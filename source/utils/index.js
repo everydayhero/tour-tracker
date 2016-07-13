@@ -103,7 +103,7 @@ const buildUrl = ({
   waypoints = [],
   zoom = 12
 }) => ([
-  'http://api-osrm-routed-production.tilestream.net/viaroute',
+  'https://router.project-osrm.org/viaroute',
   buildQuery({ waypoints, zoom })
 ].join('?'))
 
