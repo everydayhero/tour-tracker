@@ -44,12 +44,18 @@ const calcDistance = (
 
 const decoratePoint = (prevDistance, point, prev, next) => {
   const [lat, lng] = point
+  const distance = prev
+    ? prevDistance + calcDistance(prev, point)
+    : 0
+  const bearing = next
+    ? calcBearing(point, next)
+    : 0
 
   return {
     lat,
     lng,
-    distance: prevDistance + calcDistance(prev, point),
-    bearing: calcBearing(point, next)
+    distance,
+    bearing
   }
 }
 
@@ -63,8 +69,8 @@ const decoratePoints = (
   index,
   points
 ) => {
-  const prev = points[index - 1] || point
-  const next = points[index + 1] || point
+  const prev = points[index - 1]
+  const next = points[index + 1]
 
   const prevDistance = (last(decorated) || { distance: 0 }).distance
 
