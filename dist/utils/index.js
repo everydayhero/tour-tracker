@@ -108,7 +108,7 @@ var decoratePoints = function decoratePoints(decorated, point, index, points) {
 
   var prevDistance = (last(decorated) || { distance: 0 }).distance;
 
-  return [].concat(_toConsumableArray(decorated), [decoratePoint(prevDistance, pointToDecimal(point), pointToDecimal(prev), pointToDecimal(next))]);
+  return [].concat(_toConsumableArray(decorated), [decoratePoint(prevDistance, pointToDecimal(point), prev && pointToDecimal(prev), next && pointToDecimal(next))]);
 };
 
 var polylineToPoints = function polylineToPoints() {

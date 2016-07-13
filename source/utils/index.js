@@ -79,8 +79,8 @@ const decoratePoints = (
     decoratePoint(
       prevDistance,
       pointToDecimal(point),
-      pointToDecimal(prev),
-      pointToDecimal(next)
+      prev && pointToDecimal(prev),
+      next && pointToDecimal(next)
     )
   ]
 }
