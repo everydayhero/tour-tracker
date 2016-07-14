@@ -131,7 +131,7 @@ var buildUrl = function buildUrl(_ref12) {
   var waypoints = _ref12$waypoints === undefined ? [] : _ref12$waypoints;
   var _ref12$zoom = _ref12.zoom;
   var zoom = _ref12$zoom === undefined ? 12 : _ref12$zoom;
-  return ['http://api-osrm-routed-production.tilestream.net/viaroute', buildQuery({ waypoints: waypoints, zoom: zoom })].join('?');
+  return ['https://router.project-osrm.org/viaroute', buildQuery({ waypoints: waypoints, zoom: zoom })].join('?');
 };
 
 var findRoute = exports.findRoute = function findRoute(_ref13) {
