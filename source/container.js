@@ -27,6 +27,7 @@ class Container extends React.Component {
       routes = [],
       tourers = [],
       selected = '',
+      tileUrl = '',
       interactive = true,
       selectTourer
     } = this.props
@@ -36,6 +37,7 @@ class Container extends React.Component {
         routes={routes}
         tourers={tourers}
         selected={selected}
+        tileUrl={tileUrl}
         interactive={interactive}
         onSelection={selectTourer}
       />

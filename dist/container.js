@@ -78,6 +78,8 @@ var Container = function (_React$Component) {
       var tourers = _props2$tourers === undefined ? [] : _props2$tourers;
       var _props2$selected = _props2.selected;
       var selected = _props2$selected === undefined ? '' : _props2$selected;
+      var _props2$tileUrl = _props2.tileUrl;
+      var tileUrl = _props2$tileUrl === undefined ? '' : _props2$tileUrl;
       var _props2$interactive = _props2.interactive;
       var interactive = _props2$interactive === undefined ? true : _props2$interactive;
       var selectTourer = _props2.selectTourer;
@@ -87,6 +89,7 @@ var Container = function (_React$Component) {
         routes: routes,
         tourers: tourers,
         selected: selected,
+        tileUrl: tileUrl,
         interactive: interactive,
         onSelection: selectTourer
       });
