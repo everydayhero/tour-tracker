@@ -2,7 +2,8 @@ import {
   REQUEST_ROUTE,
   RECEIVE_ROUTE_SUCCESS,
   RECEIVE_ROUTE_FAILURE,
-  SELECT_TOURER
+  SELECT_TOURER,
+  SELECT_WAYPOINT
 } from '../constants'
 
 const updateItem = (collection, index, attributes) => ([
@@ -31,6 +32,11 @@ const selectTourer = (state, { id }) => ({
   selected: id
 })
 
+const selectWaypoint = (state, { id }) => ({
+  ...state,
+  selectedWaypoint: id
+})
+
 export default (state = {}, { type, payload }) => {
   switch (type) {
     case REQUEST_ROUTE:
@@ -41,6 +47,8 @@ export default (state = {}, { type, payload }) => {
       return receiveRouteSuccess(state, payload)
     case SELECT_TOURER:
       return selectTourer(state, payload)
+    case SELECT_WAYPOINT:
+      return selectWaypoint(state, payload)
     default:
       return state
   }

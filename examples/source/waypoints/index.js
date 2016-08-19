@@ -13,26 +13,21 @@ import { Pin } from '../../../source/icons'
 const TourTracker = createConnected()
 
 const WAYPOINTS = [
-  { lat: -27.465245, lng: 153.028644},
-  { lat: -31.953573, lng: 115.857006}
+    { id: 1, lat: 25.751248, lng: 71.3969271 },
+    { id: 2, lat: 25.7532, lng: 71.4181 },
+    { id: 3, lat: 26.912416, lng: 75.787247 },
+    { id: 4, lat: 28.613946, lng: 77.208949 },
+    { id: 5, lat: 30.147977, lng: 78.077645 },
+    { id: 6, lat: 26.455604, lng: 80.333899 },
+    { id: 7, lat: 25.600060, lng: 85.125679 },
+    { id: 8, lat: 27.039177, lng: 88.263870 },
+    { id: 9, lat: 25.581305, lng: 91.887587 }
 ]
 
 const TOURERS = [
   { id: '1', distance: 1000000 },
   { id: '2', distance: 2000000 }
 ]
-
-const INITIAL_STATE = {
-  routes: [
-    { waypoints: WAYPOINTS }
-  ]
-}
-
-const store = createStore(
-  reducer,
-  INITIAL_STATE,
-  applyMiddleware(thunk, logger())
-)
 
 const SELECTED_ICON = {
   iconSize: [30, 30],
@@ -46,6 +41,13 @@ const UNSELECTED_ICON = {
   iconAnchor: [15, 30],
   className: '',
   html: renderToStaticMarkup(<Pin color='#00a044' />)
+}
+
+const WAYPOINT_ICON = {
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  className: '',
+  html: renderToStaticMarkup(<Pin color='#0D2618' />)
 }
 
 const assignIcon = (selected) => (tourer) => {
@@ -62,12 +64,31 @@ const assignIcon = (selected) => (tourer) => {
   }
 }
 
+const assignWaypointIcon = (waypoint) => {
+  return ({
+    ...waypoint,
+    icon: WAYPOINT_ICON
+  })
+}
+
+const INITIAL_STATE = {
+  routes: [
+    { waypoints: WAYPOINTS.map(assignWaypointIcon) }
+  ]
+}
+
+const store = createStore(
+  reducer,
+  INITIAL_STATE,
+  applyMiddleware(thunk, logger())
+)
+
 const mapDispatch = (dispatch) => ({
   selectTourer: (id) => dispatch(selectTourer(id))
 })
 const mapState = ({ selected }) => ({ selected })
 
-const Selectable = ({
+const WaypointsExample = ({
   tourers = [],
   selected = '',
   selectTourer
@@ -98,7 +119,7 @@ const Selectable = ({
 const Example = connect(
   mapState,
   mapDispatch
-)(Selectable)
+)(WaypointsExample)
 
 export default () => (
   <Provider store={store}>

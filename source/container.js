@@ -1,11 +1,12 @@
 import React from 'react'
 import TourTracker from './'
 import { connect } from 'react-redux'
-import { fetchRoute, selectTourer } from './actions'
+import { fetchRoute, selectTourer, selectWaypoint } from './actions'
 
 const defaultMapDispatch = (dispatch) => ({
   fetchRoute: (index, route) => dispatch(fetchRoute(index, route)),
-  selectTourer: (id) => dispatch(selectTourer(id))
+  selectTourer: (id) => dispatch(selectTourer(id)),
+  selectWaypoint: (id) => dispatch(selectWaypoint(id))
 })
 
 const defaultMapState = ({
@@ -29,7 +30,8 @@ class Container extends React.Component {
       selected = '',
       tileUrl = '',
       interactive = true,
-      selectTourer
+      selectTourer,
+      selectWaypoint
     } = this.props
 
     return (
@@ -40,6 +42,7 @@ class Container extends React.Component {
         tileUrl={tileUrl}
         interactive={interactive}
         onSelection={selectTourer}
+        onWaypointSelection={selectWaypoint}
       />
     )
   }

@@ -67,6 +67,13 @@ const defaultTourerIcon = {
   html: renderToStaticMarkup(<Pin color='seagreen' />)
 }
 
+const defaultWaypointIcon = {
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  className: '',
+  html: renderToStaticMarkup(<Pin color='#0D2618' />)
+}
+
 const defaultStartIcon = {
   iconSize: [30, 30],
   className: '',
@@ -144,6 +151,9 @@ class Map extends React.Component {
 
       this._markers = global.L.featureGroup()
       this._map.addLayer(this._markers)
+
+      this._waypointMarkers = global.L.featureGroup()
+      this._map.addLayer(this._waypointMarkers)
 
       global.L.tileLayer(
         this.props.tileUrl,
@@ -264,12 +274,54 @@ class Map extends React.Component {
     )
   }
 
+  updateWaypoints (routes = this.props.routes) {
+    console.log('Update Waypoints')
+  }
+
+  renderWaypoints (routes = []) {
+    this._waypoints = routes.reduce((arr, route) => {
+      return arr.concat(route.waypoints.map(this.createWaypoint))
+    }, [])
+
+    this._map.addLayer(this._waypointMarkers)
+  }
+
+  createWaypoint = (waypoint) => {
+    if (!waypoint.icon) {
+      return waypoint
+    }
+
+    const icon = this.iconForWaypoint(waypoint)
+    const marker = global.L.marker(waypoint, { icon })
+    marker.waypoint_id = waypoint.id
+
+    marker.on('click', () => {
+      this.handleWaypointMarkerClick(marker)
+    })
+
+    this._waypointMarkers.addLayer(marker)
+
+    return {
+      ...waypoint,
+      marker
+    }
+  }
+
+  handleWaypointMarkerClick (marker) {
+    this.props.onWaypointSelection(marker.waypoint_id)
+  }
+
+  iconForWaypoint ({ icon = defaultWaypointIcon }) {
+    return global.L.divIcon(icon)
+  }
+
   updateRoutes (routes, tourers) {
     this._routes && this._routes.forEach((segment) => (
       this._map.removeLayer(segment)
     ))
     this._startMarker && this._map.removeLayer(this._startMarker)
     this._finishMarker && this._map.removeLayer(this._finishMarker)
+    this._waypointMarkers && this._map.removeLayer(this._waypointMarkers)
     this.renderRoutes(routes)
     this.updateTourers(tourers, routes)
   }
@@ -284,6 +336,7 @@ class Map extends React.Component {
     const lastPoint = last((last(routes) || {}).waypoints)
     this._routes = routes.map(this.renderRouteSegment.bind(this))
     this.renderStartAndFinish(firstPoint, lastPoint)
+    this.renderWaypoints(routes)
     this._map.fitBounds([firstPoint, lastPoint], {
       padding: [50, 50]
     })
@@ -337,6 +390,7 @@ Map.defaultProps = {
   tourers: [],
   onSelection: () => {},
   onTourerDeselection: () => {},
+  onWaypointSelection: () => {},
   tileUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}.jpg',
   tileAttribution: '&copy; <a href="http://www.esri.com/">Esri</a>'
 }

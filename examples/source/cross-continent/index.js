@@ -10,13 +10,13 @@ import reducer from '../../../source/reducer'
 const TourTracker = createConnected()
 
 const AUS_WAYPOINTS = [
-  [-31.953573, 115.857006],
-  [-27.465245, 153.028644]
+  { lat: -27.465245, lng: 153.028644},
+  { lat: -31.953573, lng: 115.857006}
 ]
 
 const US_WAYPOINTS = [
-  [37.7749, -122.4194],
-  [40.7128, -74.0059]
+  { lat: 37.7749, lng: -122.4194},
+  { lat: 40.7128, lng: -74.0059}
 ]
 
 const TOURERS = [

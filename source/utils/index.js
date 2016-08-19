@@ -95,7 +95,7 @@ const buildQuery = ({
 }) => ([
   `z=${zoom}`,
   ...waypoints.map(
-    (wp) => `loc=${wp.join(',')}`
+    (wp) => `loc=${wp.lat},${wp.lng}`
   )
 ].join('&'))
 
