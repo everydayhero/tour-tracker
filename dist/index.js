@@ -89,6 +89,13 @@ var defaultTourerIcon = {
   html: (0, _server.renderToStaticMarkup)(_react2.default.createElement(_icons.Pin, { color: 'seagreen' }))
 };
 
+var defaultWaypointIcon = {
+  iconSize: [30, 30],
+  iconAnchor: [15, 30],
+  className: '',
+  html: (0, _server.renderToStaticMarkup)(_react2.default.createElement(_icons.Pin, { color: '#0D2618' }))
+};
+
 var defaultStartIcon = {
   iconSize: [30, 30],
   className: '',
@@ -109,9 +116,35 @@ var Map = function (_React$Component) {
   _inherits(Map, _React$Component);
 
   function Map() {
+    var _Object$getPrototypeO;
+
+    var _temp, _this, _ret;
+
     _classCallCheck(this, Map);
 
-    return _possibleConstructorReturn(this, Object.getPrototypeOf(Map).apply(this, arguments));
+    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
+    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_Object$getPrototypeO = Object.getPrototypeOf(Map)).call.apply(_Object$getPrototypeO, [this].concat(args))), _this), _this.createWaypoint = function (waypoint) {
+      if (!waypoint.icon) {
+        return waypoint;
+      }
+
+      var icon = _this.iconForWaypoint(waypoint);
+      var marker = global.L.marker(waypoint, { icon: icon });
+      marker.waypoint_id = waypoint.id;
+
+      marker.on('click', function () {
+        _this.handleWaypointMarkerClick(marker);
+      });
+
+      _this._waypointMarkers.addLayer(marker);
+
+      return _extends({}, waypoint, {
+        marker: marker
+      });
+    }, _temp), _possibleConstructorReturn(_this, _ret);
   }
 
   _createClass(Map, [{
@@ -186,6 +219,9 @@ var Map = function (_React$Component) {
 
         this._markers = global.L.featureGroup();
         this._map.addLayer(this._markers);
+
+        this._waypointMarkers = global.L.featureGroup();
+        this._map.addLayer(this._waypointMarkers);
 
         global.L.tileLayer(this.props.tileUrl, { attribution: this.props.tileAttribution }).addTo(this._map);
 
@@ -329,15 +365,49 @@ var Map = function (_React$Component) {
       });
     }
   }, {
-    key: 'updateRoutes',
-    value: function updateRoutes(routes, tourers) {
+    key: 'updateWaypoints',
+    value: function updateWaypoints() {
+      var routes = arguments.length <= 0 || arguments[0] === undefined ? this.props.routes : arguments[0];
+
+      console.log('Update Waypoints');
+    }
+  }, {
+    key: 'renderWaypoints',
+    value: function renderWaypoints() {
       var _this6 = this;
 
+      var routes = arguments.length <= 0 || arguments[0] === undefined ? [] : arguments[0];
+
+      this._waypoints = routes.reduce(function (arr, route) {
+        return arr.concat(route.waypoints.map(_this6.createWaypoint));
+      }, []);
+
+      this._map.addLayer(this._waypointMarkers);
+    }
+  }, {
+    key: 'handleWaypointMarkerClick',
+    value: function handleWaypointMarkerClick(marker) {
+      this.props.onWaypointSelection(marker.waypoint_id);
+    }
+  }, {
+    key: 'iconForWaypoint',
+    value: function iconForWaypoint(_ref2) {
+      var _ref2$icon = _ref2.icon;
+      var icon = _ref2$icon === undefined ? defaultWaypointIcon : _ref2$icon;
+
+      return global.L.divIcon(icon);
+    }
+  }, {
+    key: 'updateRoutes',
+    value: function updateRoutes(routes, tourers) {
+      var _this7 = this;
+
       this._routes && this._routes.forEach(function (segment) {
-        return _this6._map.removeLayer(segment);
+        return _this7._map.removeLayer(segment);
       });
       this._startMarker && this._map.removeLayer(this._startMarker);
       this._finishMarker && this._map.removeLayer(this._finishMarker);
+      this._waypointMarkers && this._map.removeLayer(this._waypointMarkers);
       this.renderRoutes(routes);
       this.updateTourers(tourers, routes);
     }
@@ -356,17 +426,18 @@ var Map = function (_React$Component) {
       var lastPoint = (0, _utils.last)(((0, _utils.last)(routes) || {}).waypoints);
       this._routes = routes.map(this.renderRouteSegment.bind(this));
       this.renderStartAndFinish(firstPoint, lastPoint);
+      this.renderWaypoints(routes);
       this._map.fitBounds([firstPoint, lastPoint], {
         padding: [50, 50]
       });
     }
   }, {
     key: 'renderRouteSegment',
-    value: function renderRouteSegment(_ref2) {
-      var _ref2$style = _ref2.style;
-      var style = _ref2$style === undefined ? defaultSegmentStyle : _ref2$style;
-      var _ref2$points = _ref2.points;
-      var points = _ref2$points === undefined ? [] : _ref2$points;
+    value: function renderRouteSegment(_ref3) {
+      var _ref3$style = _ref3.style;
+      var style = _ref3$style === undefined ? defaultSegmentStyle : _ref3$style;
+      var _ref3$points = _ref3.points;
+      var points = _ref3$points === undefined ? [] : _ref3$points;
 
       return global.L.polyline(points, style).addTo(this._map);
     }
@@ -410,6 +481,7 @@ Map.defaultProps = {
   tourers: [],
   onSelection: function onSelection() {},
   onTourerDeselection: function onTourerDeselection() {},
+  onWaypointSelection: function onWaypointSelection() {},
   tileUrl: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}.jpg',
   tileAttribution: '&copy; <a href="http://www.esri.com/">Esri</a>'
 };

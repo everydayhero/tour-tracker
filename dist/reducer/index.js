@@ -44,11 +44,18 @@ var selectTourer = function selectTourer(state, _ref4) {
   });
 };
 
+var selectWaypoint = function selectWaypoint(state, _ref5) {
+  var id = _ref5.id;
+  return _extends({}, state, {
+    selectedWaypoint: id
+  });
+};
+
 exports.default = function () {
   var state = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-  var _ref5 = arguments[1];
-  var type = _ref5.type;
-  var payload = _ref5.payload;
+  var _ref6 = arguments[1];
+  var type = _ref6.type;
+  var payload = _ref6.payload;
 
   switch (type) {
     case _constants.REQUEST_ROUTE:
@@ -59,6 +66,8 @@ exports.default = function () {
       return receiveRouteSuccess(state, payload);
     case _constants.SELECT_TOURER:
       return selectTourer(state, payload);
+    case _constants.SELECT_WAYPOINT:
+      return selectWaypoint(state, payload);
     default:
       return state;
   }

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.selectTourer = exports.fetchRoute = undefined;
+exports.selectWaypoint = exports.selectTourer = exports.fetchRoute = undefined;
 
 var _utils = require('../utils');
 
@@ -45,6 +45,13 @@ var fetchRoute = exports.fetchRoute = function fetchRoute(index, waypoints) {
 var selectTourer = exports.selectTourer = function selectTourer(id) {
   return {
     type: _constants.SELECT_TOURER,
+    payload: { id: id }
+  };
+};
+
+var selectWaypoint = exports.selectWaypoint = function selectWaypoint(id) {
+  return {
+    type: _constants.SELECT_WAYPOINT,
     payload: { id: id }
   };
 };

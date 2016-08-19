@@ -33,6 +33,9 @@ var defaultMapDispatch = function defaultMapDispatch(dispatch) {
     },
     selectTourer: function selectTourer(id) {
       return dispatch((0, _actions.selectTourer)(id));
+    },
+    selectWaypoint: function selectWaypoint(id) {
+      return dispatch((0, _actions.selectWaypoint)(id));
     }
   };
 };
@@ -83,6 +86,7 @@ var Container = function (_React$Component) {
       var _props2$interactive = _props2.interactive;
       var interactive = _props2$interactive === undefined ? true : _props2$interactive;
       var selectTourer = _props2.selectTourer;
+      var selectWaypoint = _props2.selectWaypoint;
 
 
       return _react2.default.createElement(_2.default, {
@@ -91,7 +95,8 @@ var Container = function (_React$Component) {
         selected: selected,
         tileUrl: tileUrl,
         interactive: interactive,
-        onSelection: selectTourer
+        onSelection: selectTourer,
+        onWaypointSelection: selectWaypoint
       });
     }
   }]);

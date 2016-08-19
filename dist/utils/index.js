@@ -122,7 +122,7 @@ var buildQuery = function buildQuery(_ref11) {
   var _ref11$zoom = _ref11.zoom;
   var zoom = _ref11$zoom === undefined ? 12 : _ref11$zoom;
   return ['z=' + zoom].concat(_toConsumableArray(waypoints.map(function (wp) {
-    return 'loc=' + wp.join(',');
+    return 'loc=' + wp.lat + ',' + wp.lng;
   }))).join('&');
 };
 
