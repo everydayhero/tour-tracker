@@ -3,7 +3,8 @@ import {
   REQUEST_ROUTE,
   RECEIVE_ROUTE_SUCCESS,
   RECEIVE_ROUTE_FAILURE,
-  SELECT_TOURER
+  SELECT_TOURER,
+  SELECT_WAYPOINT
 } from '../constants'
 
 const requestRoute = (index) => ({
@@ -36,3 +37,7 @@ export const selectTourer = (id) => ({
   payload: { id }
 })
 
+export const selectWaypoint = (id) => ({
+  type: SELECT_WAYPOINT,
+  payload: { id }
+})
