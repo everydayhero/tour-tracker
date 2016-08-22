@@ -25,13 +25,13 @@ class Container extends React.Component {
 
   render () {
     const {
-      routes = [],
-      tourers = [],
-      selected = '',
-      tileUrl = '',
       interactive = true,
+      routes = [],
       selectTourer,
-      selectWaypoint
+      selectWaypoint,
+      selected = '',
+      tileUrl,
+      tourers = []
     } = this.props
 
     return (
