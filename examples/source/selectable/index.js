@@ -13,8 +13,8 @@ import { Pin } from '../../../source/icons'
 const TourTracker = createConnected()
 
 const WAYPOINTS = [
-  { lat: -27.465245, lng: 153.028644},
-  { lat: -31.953573, lng: 115.857006}
+  { lat: -27.465245, lng: 153.028644 },
+  { lat: -31.953573, lng: 115.857006 }
 ]
 
 const TOURERS = [
