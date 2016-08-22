@@ -146,8 +146,8 @@ class Map extends React.Component {
 
       this._map.on('popupopen', this.handlePopupOpen.bind(this))
 
-      this._startIcon = global.L.divIcon(defaultStartIcon)
-      this._finishIcon = global.L.divIcon(defaultFinishIcon)
+      this._startIcon = global.L.divIcon(this.props.startIcon)
+      this._finishIcon = global.L.divIcon(this.props.finishIcon)
 
       this._markers = global.L.featureGroup()
       this._map.addLayer(this._markers)
@@ -382,12 +382,30 @@ Map.propTypes = {
         html: PropTypes.string
       })
     })
-  )
+  ),
+  startIcon: PropTypes.shape({
+    iconSize: PropTypes.arrayOf(
+      PropTypes.number,
+      PropTypes.number
+    ),
+    className: PropTypes.string,
+    html: PropTypes.string
+  }),
+  finishIcon: PropTypes.shape({
+    iconSize: PropTypes.arrayOf(
+      PropTypes.number,
+      PropTypes.number
+    ),
+    className: PropTypes.string,
+    html: PropTypes.string
+  })
 }
 
 Map.defaultProps = {
   routes: [],
   tourers: [],
+  startIcon: defaultStartIcon,
+  finishIcon: defaultFinishIcon,
   onSelection: () => {},
   onTourerDeselection: () => {},
   onWaypointSelection: () => {},
