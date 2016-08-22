@@ -280,13 +280,13 @@ class Map extends React.Component {
 
   renderWaypoints (routes = []) {
     this._waypoints = routes.reduce((arr, route) => {
-      return arr.concat(route.waypoints.map(this.createWaypoint))
+      return arr.concat(route.waypoints.map(this.createWaypoint.bind(this)))
     }, [])
 
     this._map.addLayer(this._waypointMarkers)
   }
 
-  createWaypoint = (waypoint) => {
+  createWaypoint (waypoint) {
     if (!waypoint.icon) {
       return waypoint
     }
