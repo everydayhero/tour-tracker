@@ -24,25 +24,9 @@ class Container extends React.Component {
   }
 
   render () {
-    const {
-      interactive = true,
-      routes = [],
-      selectTourer,
-      selectWaypoint,
-      selected = '',
-      tileUrl,
-      tourers = []
-    } = this.props
-
     return (
       <TourTracker
-        routes={routes}
-        tourers={tourers}
-        selected={selected}
-        tileUrl={tileUrl}
-        interactive={interactive}
-        onSelection={selectTourer}
-        onWaypointSelection={selectWaypoint}
+        {...this.props}
       />
     )
   }
