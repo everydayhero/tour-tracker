@@ -3,6 +3,7 @@
   "version": "1.0.1-9",
   "description": "",
   "main": "dist/index.js",
+  "files" : ["dist"],
   "scripts": {
     "build": "babel --ignore=**/__tests__/*.js source -d dist",
     "dev": "webpack-dev-server --config examples/webpack.config.js --content-base examples/build --history-api-fallback",
