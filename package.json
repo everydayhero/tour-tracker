@@ -2,7 +2,7 @@
   "name": "tour-tracker",
   "version": "1.0.1-8",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "babel --ignore=**/__tests__/*.js source -d dist",
     "dev": "webpack-dev-server --config examples/webpack.config.js --content-base examples/build --history-api-fallback",
