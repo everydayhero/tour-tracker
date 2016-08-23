@@ -274,10 +274,6 @@ class Map extends React.Component {
     )
   }
 
-  updateWaypoints (routes = this.props.routes) {
-    console.log('Update Waypoints')
-  }
-
   renderWaypoints (routes = []) {
     this._waypoints = routes.reduce((arr, route) => {
       return arr.concat(route.waypoints.map(this.createWaypoint.bind(this)))
