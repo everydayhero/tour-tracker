@@ -6,7 +6,7 @@
   "scripts": {
     "build": "babel --ignore=**/__tests__/*.js source -d dist",
     "dev": "webpack-dev-server --config examples/webpack.config.js --content-base examples/build --history-api-fallback",
-    "test": "mocha source/__tests__/index.js --compilers js:babel-register"
+    "test": "mocha source/components/Map/__tests__/index.js --compilers js:babel-register"
   },
   "author": "Brad Parker <hi@bradparker.com>",
   "license": "ISC",
