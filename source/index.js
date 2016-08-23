@@ -1,5 +1,5 @@
 export { default as Map } from './components/Map'
 export { default as createConnected } from './container'
-export { default as actions } from './actions'
 export { default as reducer } from './reducer'
-export { default as constants } from './constants'
+export * from './actions'
+export * from './constants'
