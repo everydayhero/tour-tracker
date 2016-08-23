@@ -5,8 +5,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { Provider } from 'react-redux'
 import { createStore, applyMiddleware } from 'redux'
 
-import createConnected from '../../../source/container'
-import reducer from '../../../source/reducer'
+import { createConnected, reducer } from '../../../source'
 
 const TourTracker = createConnected()
 

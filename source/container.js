@@ -1,5 +1,5 @@
 import React from 'react'
-import TourTracker from './'
+import TourTracker from './components/Map'
 import { connect } from 'react-redux'
 import { fetchRoute, selectTourer, selectWaypoint } from './actions'
 
