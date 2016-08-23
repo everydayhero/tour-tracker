@@ -27,6 +27,8 @@ class Container extends React.Component {
     return (
       <TourTracker
         {...this.props}
+        onSelection={this.props.selectTourer}
+        onWaypointSelection={this.props.selectWaypoint}
       />
     )
   }
