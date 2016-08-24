@@ -3,6 +3,14 @@ import TourTracker from './components/Map'
 import { connect } from 'react-redux'
 import { fetchRoute, selectTourer, selectWaypoint } from './actions'
 
+const isFetched = ({ status } = {}) => status === 'fetched'
+
+const unlessFetched = (resource = {}, fetcher) => (
+  isFetched(resource)
+    ? Promise.resolve()
+    : fetcher()
+)
+
 const defaultMapDispatch = (dispatch) => ({
   fetchRoute: (index, route) => dispatch(fetchRoute(index, route)),
   selectTourer: (id) => dispatch(selectTourer(id)),
@@ -20,7 +28,7 @@ const defaultMapState = ({
 class Container extends React.Component {
   componentDidMount () {
     const { fetchRoute, routes } = this.props
-    routes.forEach(({ waypoints }, index) => fetchRoute(index, waypoints))
+    routes.forEach((route, index) => unlessFetched(route, () => fetchRoute(index, route.waypoints)))
   }
 
   render () {
