@@ -72,17 +72,16 @@ const decoratePoints = (
   const prev = points[index - 1]
   const next = points[index + 1]
 
-  const prevDistance = (last(decorated) || { distance: 0 }).distance
+  const prevDistance = (decorated[0] || { distance: 0 }).distance
 
-  return [
-    ...decorated,
-    decoratePoint(
-      prevDistance,
-      pointToDecimal(point),
-      prev && pointToDecimal(prev),
-      next && pointToDecimal(next)
-    )
-  ]
+  decorated.push(decoratePoint(
+    prevDistance,
+    pointToDecimal(point),
+    prev && pointToDecimal(prev),
+    next && pointToDecimal(next)
+  ))
+
+  return decorated
 }
 
 const polylineToPoints = (routeGeometry = '') => (
