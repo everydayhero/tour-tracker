@@ -72,7 +72,7 @@ const decoratePoints = (
   const prev = points[index - 1]
   const next = points[index + 1]
 
-  const prevDistance = (decorated[0] || { distance: 0 }).distance
+  const prevDistance = (decorated[decorated.length - 1] || { distance: 0 }).distance
 
   decorated.push(decoratePoint(
     prevDistance,
