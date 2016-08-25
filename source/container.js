@@ -3,10 +3,10 @@ import TourTracker from './components/Map'
 import { connect } from 'react-redux'
 import { fetchRoute, selectTourer, selectWaypoint } from './actions'
 
-const isFetched = ({ status } = {}) => status === 'fetched'
+const isFetchedOrFetching = ({ status } = {}) => status === 'fetched' || status === 'fetching'
 
 const unlessFetched = (resource = {}, fetcher) => (
-  isFetched(resource)
+  isFetchedOrFetching(resource)
     ? Promise.resolve()
     : fetcher()
 )
