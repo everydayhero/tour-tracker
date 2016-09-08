@@ -59,10 +59,6 @@ const decoratePoint = (prevDistance, point, prev, next) => {
   }
 }
 
-const pointToDecimal = ([x, y]) => (
-  [x / 10, y / 10]
-)
-
 const decoratePoints = (
   decorated,
   point,
@@ -76,9 +72,9 @@ const decoratePoints = (
 
   decorated.push(decoratePoint(
     prevDistance,
-    pointToDecimal(point),
-    prev && pointToDecimal(prev),
-    next && pointToDecimal(next)
+    point,
+    prev,
+    next
   ))
 
   return decorated
@@ -88,31 +84,11 @@ const polylineToPoints = (routeGeometry = '') => (
   decode(routeGeometry).reduce(decoratePoints, [])
 )
 
-const buildQuery = ({
-  waypoints = [],
-  zoom = 12
-}) => ([
-  `z=${zoom}`,
-  ...waypoints.map(
-    (wp) => `loc=${wp.lat},${wp.lng}`
-  )
-].join('&'))
+const buildWaypoints = (waypoints) => waypoints.map(point => `${point.lng},${point.lat}`).join(';')
 
-const buildUrl = ({
-  waypoints = [],
-  zoom = 12
-}) => ([
-  'https://router.project-osrm.org/viaroute',
-  buildQuery({ waypoints, zoom })
-].join('?'))
+const buildUrl = ({ waypoints = [] }) => `https://router.project-osrm.org/route/v1/driving/${buildWaypoints(waypoints)}?overview=full`
 
-export const findRoute = ({
-  waypoints = [],
-  zoom = 12
-}) => (
-  axios(
-    buildUrl({ waypoints, zoom })
-  ).then(
-    ({ data }) => polylineToPoints(data.route_geometry)
-  )
+export const findRoute = ({ waypoints = [] }) => (
+  axios(buildUrl({ waypoints }))
+    .then(({ data }) => polylineToPoints(data.routes[0].geometry))
 )
