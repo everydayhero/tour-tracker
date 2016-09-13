@@ -35,11 +35,11 @@ const calcDistance = (
   const yB = toRad(lonB)
   const deltaY = yB - yA
 
-  return Math.acos(
+  return Math.acos(Math.min(
     Math.sin(xA) * Math.sin(xB) +
     Math.cos(xA) * Math.cos(xB) *
     Math.cos(deltaY)
-  ) * EARTHS_RADIUS_IN_METERS
+  ), 1) * EARTHS_RADIUS_IN_METERS
 }
 
 const decoratePoint = (prevDistance, point, prev, next) => {
