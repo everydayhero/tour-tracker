@@ -35,6 +35,10 @@ const calcDistance = (
   const yB = toRad(lonB)
   const deltaY = yB - yA
 
+  if (xA === xB && yA === yB) {
+    return 0
+  }
+
   return Math.acos(Math.min(
     Math.sin(xA) * Math.sin(xB) +
     Math.cos(xA) * Math.cos(xB) *
