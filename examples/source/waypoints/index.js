@@ -98,6 +98,8 @@ const WaypointsExample = ({
       <TourTracker
         tourers={decoratedTourers}
         selected={selected}
+        focusOnTourer={decoratedTourers[0].id}
+        zoom={5}
       />
       <select
         value={selected}

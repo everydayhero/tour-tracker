@@ -160,16 +160,23 @@ class Map extends React.Component {
         { attribution: this.props.tileAttribution }
       ).addTo(this._map)
 
-      this._map.fitBounds([
-        first((first(this.props.routes) || {}).waypoints),
-        last((last(this.props.routes) || {}).waypoints)
-      ], { padding: [50, 50] })
+      if (!this.props.focusOnTourer) {
+        this.focusOnRoute(this.props.routes)
+      }
 
       if (canRenderRoutes(this.props.routes)) {
         this.renderRoutes(this.props.routes)
         this.createTourers()
       }
+
     }
+  }
+
+  focusOnRoute (routes) {
+    this._map.fitBounds([
+      first((first(routes) || {}).waypoints),
+      last((last(routes) || {}).waypoints)
+    ], { padding: [50, 50] })
   }
 
   openTourerPopup (marker) {
@@ -211,7 +218,9 @@ class Map extends React.Component {
 
   updateTourers (
     nextTourers = this.props.tourers,
-    routes = this.props.routes
+    routes = this.props.routes,
+    focusOnTourer = this.props.focusOnTourer,
+    zoom = this.props.zoom
   ) {
     const points = routes.reduce((acc, route) => (
       acc.concat(route.points.map((p) => ({
@@ -223,7 +232,7 @@ class Map extends React.Component {
     this._tourers = nextTourers.map((nextTourer) => {
       const existingTourer = find(this._tourers, (t) => t.id === nextTourer.id)
       if (!existingTourer) {
-        return this.createTourer(nextTourer, points)
+        return this.createTourer(nextTourer, points, focusOnTourer, zoom)
       } else {
         return this.updateTourer({
           ...existingTourer,
@@ -234,7 +243,7 @@ class Map extends React.Component {
     })
   }
 
-  createTourer (tourer = {}, points = []) {
+  createTourer (tourer = {}, points = [], focusOnTourer, zoom = 10) {
     const { distance, popup } = tourer
     const point = calcTourerPosition(distance, points)
     const icon = this.iconForTourer(tourer)
@@ -254,6 +263,12 @@ class Map extends React.Component {
     marker.tourer_id = tourer.id
     this._markers.addLayer(marker)
 
+    if (tourer.id === focusOnTourer) {
+      this._map.fitBounds([
+        point
+      ], { maxZoom: zoom })
+    }
+
     return {
       ...tourer,
       marker
@@ -261,7 +276,7 @@ class Map extends React.Component {
   }
 
   createTourers () {
-    const { tourers = [], routes = [] } = this.props
+    const { tourers = [], routes = [], focusOnTourer, zoom } = this.props
     const points = routes.reduce((acc, route) => (
       acc.concat(route.points.map((p) => ({
         ...p,
@@ -270,7 +285,7 @@ class Map extends React.Component {
     ), [])
 
     this._tourers = tourers.map(
-      (tourer) => this.createTourer(tourer, points)
+      (tourer) => this.createTourer(tourer, points, focusOnTourer, zoom)
     )
   }
 
