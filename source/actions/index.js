@@ -14,7 +14,7 @@ const requestRoute = (index) => ({
 
 const receiveRouteSuccess = (index, points) => ({
   type: RECEIVE_ROUTE_SUCCESS,
-  payload: { index, points   }
+  payload: { index, points }
 })
 
 const receiveRouteFailure = (index, error) => ({
@@ -25,7 +25,7 @@ const receiveRouteFailure = (index, error) => ({
 export const fetchRoute = (index, waypoints) => (dispatch) => {
   dispatch(requestRoute(index))
 
-return findRoute({ waypoints }).then((points) => (
+  return findRoute({ waypoints }).then((points) => (
     dispatch(receiveRouteSuccess(index, points))
   )).catch((error) => (
     dispatch(receiveRouteFailure(index, error))
