@@ -165,10 +165,12 @@ class Map extends React.Component {
         { attribution: this.props.tileAttribution }
       ).addTo(this._map)
 
-      this.focusOnRoute(this.props.routes)
+      if (this.props.focusMode !== 'selected') {
+        this.focusOnRoute(this.props.routes)
+      }
 
       if (canRenderRoutes(this.props.routes)) {
-        this.renderRoutes(this.props.routes)
+        this.renderRoutes(this.props.routes, this.props.focusMode !== 'selected')
         this.renderRouteConnections()
         this.createTourers()
       }
@@ -269,6 +271,7 @@ class Map extends React.Component {
     this._markers.addLayer(marker)
 
     if (focusMode === 'selected' && tourer.id === selected) {
+      console.log('fitBounds on Selected')
       this._map.fitBounds([
         point
       ], { maxZoom: zoom })
@@ -348,15 +351,17 @@ class Map extends React.Component {
     this._finishMarker = global.L.marker(finish, { icon: this._finishIcon }).addTo(this._map)
   }
 
-  renderRoutes (routes = []) {
+  renderRoutes (routes = [], focus) {
     const firstPoint = first((first(routes) || {}).waypoints)
     const lastPoint = last((last(routes) || {}).waypoints)
     this._routes = routes.map(this.renderRouteSegment.bind(this))
     this.renderStartAndFinish(firstPoint, lastPoint)
     this.renderWaypoints(routes)
-    this._map.fitBounds([firstPoint, lastPoint], {
-      padding: [50, 50]
-    })
+    if (focus) {
+      this._map.fitBounds([firstPoint, lastPoint], {
+        padding: [50, 50]
+      })
+    }
   }
 
   renderRouteSegment ({
