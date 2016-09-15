@@ -90,6 +90,11 @@ const defaultSegmentStyle = {
   color: '#7ec774'
 }
 
+const defaultConnectorStyles = {
+  color: '#333',
+  opacity: 0.125
+}
+
 class Map extends React.Component {
   shouldComponentUpdate () {
     return false
@@ -166,6 +171,7 @@ class Map extends React.Component {
 
       if (canRenderRoutes(this.props.routes)) {
         this.renderRoutes(this.props.routes)
+        this.renderRouteConnections()
         this.createTourers()
       }
 
@@ -334,6 +340,7 @@ class Map extends React.Component {
     this._finishMarker && this._map.removeLayer(this._finishMarker)
     this._waypointMarkers && this._map.removeLayer(this._waypointMarkers)
     this.renderRoutes(routes)
+    this.renderRouteConnections()
     this.updateTourers(tourers, routes)
   }
 
@@ -358,6 +365,24 @@ class Map extends React.Component {
     points = []
   }) {
     return global.L.polyline(points, style).addTo(this._map)
+  }
+
+  renderRouteConnections () {
+    const {
+      routes,
+      connectRoutes,
+      connectorStyles = defaultConnectorStyles
+    } = this.props
+
+    if (connectRoutes) {
+      const connectorPaths = routes.reduce((paths, current, index, routes) => (
+        index > 0 ? [
+          ...paths,
+          [last(routes[index - 1].waypoints), first(routes[index].waypoints)]
+        ] : paths
+      ), []);
+      connectorPaths.map(path => global.L.polyline(path, connectorStyles).addTo(this._map))
+    }
   }
 
   render () {
