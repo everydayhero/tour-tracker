@@ -271,7 +271,6 @@ class Map extends React.Component {
     this._markers.addLayer(marker)
 
     if (focusMode === 'selected' && tourer.id === selected) {
-      console.log('fitBounds on Selected')
       this._map.fitBounds([
         point
       ], { maxZoom: zoom })
