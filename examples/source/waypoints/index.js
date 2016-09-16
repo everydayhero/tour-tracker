@@ -84,7 +84,7 @@ const store = createStore(
 const mapDispatch = (dispatch) => ({
   selectTourer: (id) => dispatch(selectTourer(id))
 })
-const mapState = ({ selected }) => ({ selected })
+const mapState = ({ selected = '1' }) => ({ selected })
 
 const WaypointsExample = ({
   tourers = [],
@@ -98,6 +98,8 @@ const WaypointsExample = ({
       <TourTracker
         tourers={decoratedTourers}
         selected={selected}
+        focusMode='selected'
+        zoom={5}
       />
       <select
         value={selected}

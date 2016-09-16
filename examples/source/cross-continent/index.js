@@ -40,6 +40,7 @@ export default () => (
   <Provider store={store}>
     <TourTracker
       tourers={TOURERS}
+      connectRoutes
     />
   </Provider>
 )

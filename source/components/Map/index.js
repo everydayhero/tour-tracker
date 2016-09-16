@@ -90,6 +90,11 @@ const defaultSegmentStyle = {
   color: '#7ec774'
 }
 
+const defaultConnectorStyles = {
+  color: '#333',
+  opacity: 0.125
+}
+
 class Map extends React.Component {
   shouldComponentUpdate () {
     return false
@@ -160,16 +165,24 @@ class Map extends React.Component {
         { attribution: this.props.tileAttribution }
       ).addTo(this._map)
 
-      this._map.fitBounds([
-        first((first(this.props.routes) || {}).waypoints),
-        last((last(this.props.routes) || {}).waypoints)
-      ], { padding: [50, 50] })
+      if (this.props.focusMode !== 'selected') {
+        this.focusOnRoute(this.props.routes)
+      }
 
       if (canRenderRoutes(this.props.routes)) {
-        this.renderRoutes(this.props.routes)
+        this.renderRoutes(this.props.routes, this.props.focusMode !== 'selected')
+        this.renderRouteConnections()
         this.createTourers()
       }
+
     }
+  }
+
+  focusOnRoute (routes) {
+    this._map.fitBounds([
+      first((first(routes) || {}).waypoints),
+      last((last(routes) || {}).waypoints)
+    ], { padding: [50, 50] })
   }
 
   openTourerPopup (marker) {
@@ -211,7 +224,10 @@ class Map extends React.Component {
 
   updateTourers (
     nextTourers = this.props.tourers,
-    routes = this.props.routes
+    routes = this.props.routes,
+    selected = this.props.selected,
+    focusMode = this.props.focusMode,
+    zoom = this.props.zoom
   ) {
     const points = routes.reduce((acc, route) => (
       acc.concat(route.points.map((p) => ({
@@ -223,7 +239,7 @@ class Map extends React.Component {
     this._tourers = nextTourers.map((nextTourer) => {
       const existingTourer = find(this._tourers, (t) => t.id === nextTourer.id)
       if (!existingTourer) {
-        return this.createTourer(nextTourer, points)
+        return this.createTourer(nextTourer, points, selected, focusMode, zoom)
       } else {
         return this.updateTourer({
           ...existingTourer,
@@ -234,7 +250,7 @@ class Map extends React.Component {
     })
   }
 
-  createTourer (tourer = {}, points = []) {
+  createTourer (tourer = {}, points = [], selected, focusMode, zoom = 10) {
     const { distance, popup } = tourer
     const point = calcTourerPosition(distance, points)
     const icon = this.iconForTourer(tourer)
@@ -254,6 +270,12 @@ class Map extends React.Component {
     marker.tourer_id = tourer.id
     this._markers.addLayer(marker)
 
+    if (focusMode === 'selected' && tourer.id === selected) {
+      this._map.fitBounds([
+        point
+      ], { maxZoom: zoom })
+    }
+
     return {
       ...tourer,
       marker
@@ -261,7 +283,7 @@ class Map extends React.Component {
   }
 
   createTourers () {
-    const { tourers = [], routes = [] } = this.props
+    const { tourers = [], routes = [], selected, focusMode, zoom } = this.props
     const points = routes.reduce((acc, route) => (
       acc.concat(route.points.map((p) => ({
         ...p,
@@ -270,7 +292,7 @@ class Map extends React.Component {
     ), [])
 
     this._tourers = tourers.map(
-      (tourer) => this.createTourer(tourer, points)
+      (tourer) => this.createTourer(tourer, points, selected, focusMode, zoom)
     )
   }
 
@@ -319,6 +341,7 @@ class Map extends React.Component {
     this._finishMarker && this._map.removeLayer(this._finishMarker)
     this._waypointMarkers && this._map.removeLayer(this._waypointMarkers)
     this.renderRoutes(routes)
+    this.renderRouteConnections()
     this.updateTourers(tourers, routes)
   }
 
@@ -327,15 +350,17 @@ class Map extends React.Component {
     this._finishMarker = global.L.marker(finish, { icon: this._finishIcon }).addTo(this._map)
   }
 
-  renderRoutes (routes = []) {
+  renderRoutes (routes = [], focus) {
     const firstPoint = first((first(routes) || {}).waypoints)
     const lastPoint = last((last(routes) || {}).waypoints)
     this._routes = routes.map(this.renderRouteSegment.bind(this))
     this.renderStartAndFinish(firstPoint, lastPoint)
     this.renderWaypoints(routes)
-    this._map.fitBounds([firstPoint, lastPoint], {
-      padding: [50, 50]
-    })
+    if (focus) {
+      this._map.fitBounds([firstPoint, lastPoint], {
+        padding: [50, 50]
+      })
+    }
   }
 
   renderRouteSegment ({
@@ -343,6 +368,24 @@ class Map extends React.Component {
     points = []
   }) {
     return global.L.polyline(points, style).addTo(this._map)
+  }
+
+  renderRouteConnections () {
+    const {
+      routes,
+      connectRoutes,
+      connectorStyles = defaultConnectorStyles
+    } = this.props
+
+    if (connectRoutes) {
+      const connectorPaths = routes.reduce((paths, current, index, routes) => (
+        index > 0 ? [
+          ...paths,
+          [last(routes[index - 1].waypoints), first(routes[index].waypoints)]
+        ] : paths
+      ), []);
+      connectorPaths.map(path => global.L.polyline(path, connectorStyles).addTo(this._map))
+    }
   }
 
   render () {

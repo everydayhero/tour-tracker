@@ -10,6 +10,7 @@ import Map from '../'
 chai.use(chaiEnzyme())
 
 const setLatLngSpy = sinon.spy()
+const fitBoundsSpy = sinon.spy()
 const mocklet = {
   map: sinon.spy(function () {
     return {
@@ -20,7 +21,7 @@ const mocklet = {
       scrollWheelZoom: { disable () {}, enable () {} },
       keyboard: { disable () {}, enable () {} },
       on () {},
-      fitBounds () {}
+      fitBounds: fitBoundsSpy
     }
   }),
 
@@ -60,30 +61,34 @@ const mocklet = {
   })
 }
 
-const createSampleMap = (
-  routes = [
-    {
-      waypoints: [
-        [0, 0],
-        [0, 50]
-      ],
-      points: [
-        { lat: 0, lng: 0, distance: 0, bearing: 90 },
-        { lat: 0, lng: 50, distance: 5560000 }
-      ]
-    }
-  ],
-  tourers = [
-    { id: '1', distance: 0 },
-    { id: '2', distance: 2780000 },
-    { id: '3', distance: 5560000 }
-  ]
-) => (
-  mount(<Map
+const createSampleMap = (args = {}) => {
+  const {
+    routes = [
+      {
+        waypoints: [
+          [0, 0],
+          [0, 50]
+        ],
+        points: [
+          { lat: 0, lng: 0, distance: 0, bearing: 90 },
+          { lat: 0, lng: 50, distance: 5560000 }
+        ]
+      }
+    ],
+    tourers = [
+      { id: '1', distance: 0 },
+      { id: '2', distance: 2780000 },
+      { id: '3', distance: 5560000 }
+    ],
+    ...props
+  } = args
+
+  return mount(<Map
     routes={routes}
     tourers={tourers}
+    {...props}
   />)
-)
+}
 
 const initialL = global.L
 global.L = mocklet
@@ -116,6 +121,30 @@ describe('Map', () => {
     mocklet.marker.reset()
     createSampleMap()
     expect(mocklet.marker.getCall(1).args[0]).to.eql([0, 50])
+  })
+
+  it('will fit the route inside the bounds of the viewport', () => {
+    fitBoundsSpy.reset()
+    createSampleMap()
+    expect(fitBoundsSpy.getCall(0).args[0]).to.eql([[0, 0], [0, 50]])
+  })
+
+  it('will call fitBounds on the selected rider\'s coords when focusMode is set to selected', () => {
+    fitBoundsSpy.reset()
+    createSampleMap({ selected: '2', focusMode: 'selected' })
+    expect({
+      lat: Math.round(fitBoundsSpy.getCall(0).args[0][0].lat),
+      lng: Math.round(fitBoundsSpy.getCall(0).args[0][0].lng)
+    }).to.eql({
+      lat: 0,
+      lng: 25
+    })
+  })
+
+  it('will call fitBounds with a specified zoom when the focusMode is set to the selected rider', () => {
+    fitBoundsSpy.reset()
+    createSampleMap({ selected: '2', focusMode: 'selected', zoom: 99 })
+    expect(fitBoundsSpy.getCall(0).args[1].maxZoom).to.eql(99)
   })
 
   it('positions the rider\'s markers according to how far along the route they are', () => {
@@ -190,8 +219,8 @@ describe('Map', () => {
 
   it('can plot a rider along multiple route-segments', () => {
     mocklet.marker.reset()
-    createSampleMap(
-      [
+    createSampleMap({
+      routes: [
         {
           waypoints: [
             [0, 0],
@@ -213,10 +242,10 @@ describe('Map', () => {
           ]
         }
       ],
-      [
+      tourers: [
         { id: '1', distance: 8340000 }
       ]
-    )
+    })
 
     const point = mocklet.marker.getCall(2).args[0]
     expect({
