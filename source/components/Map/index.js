@@ -179,10 +179,8 @@ class Map extends React.Component {
   }
 
   focusOnRoute (routes) {
-    this._map.fitBounds([
-      first((first(routes) || {}).waypoints),
-      last((last(routes) || {}).waypoints)
-    ], { padding: [50, 50] })
+    const waypoints = routes.reduce((routes, route) => routes.concat(route.waypoints), [])
+    this._map.fitBounds(waypoints, { padding: [50, 50] })
   }
 
   openTourerPopup (marker) {
@@ -357,9 +355,7 @@ class Map extends React.Component {
     this.renderStartAndFinish(firstPoint, lastPoint)
     this.renderWaypoints(routes)
     if (focus) {
-      this._map.fitBounds([firstPoint, lastPoint], {
-        padding: [50, 50]
-      })
+      this.focusOnRoute(routes)
     }
   }
 
