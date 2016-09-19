@@ -179,7 +179,7 @@ class Map extends React.Component {
   }
 
   focusOnRoute (routes) {
-    const waypoints = routes.reduce((routes, route) => routes.concat(route.waypoints), [])
+    const waypoints = routes.reduce((waypoints, route) => waypoints.concat(route.waypoints), [])
     this._map.fitBounds(waypoints, { padding: [50, 50] })
   }
 
