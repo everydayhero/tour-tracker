@@ -14,10 +14,9 @@ const NullPoint = {
   lng: 0
 }
 
-const findTourerStartingPoint = (distance, points) => (
-  find(points, (point, index) => {
-    const next = points[index + 1] || { distance: 0 }
-
+const findTourerStartingPoint = (distance, route) => (
+  find(route.points, (point, index) => {
+    const next = route.points[index + 1] || { distance: 0 }
     return (
       (distance > point.distance) &&
       (distance < next.distance)
@@ -25,16 +24,23 @@ const findTourerStartingPoint = (distance, points) => (
   }) || NullPoint
 )
 
-const calcTourerPosition = (distance, points) => {
-  const firstPoint = first(points) || NullPoint
-  const finalPoint = last(points) || NullPoint
-  const routeTotal = finalPoint.distance
+const findTourersCurrentRoute = (distance, routes) => (
+  find(routes, (route, index) => distance < route.total)
+)
+
+const calcTourerPosition = (distance, routes) => {
+  const firstPoint = first((first(routes) || {}).points) || NullPoint
+  const finalPoint = last((last(routes) || {}).points) || NullPoint
+  const routeTotal = last(routes).total
 
   if (distance <= 0) return firstPoint
   if (distance >= routeTotal) return finalPoint
 
-  const startPoint = findTourerStartingPoint(distance, points)
-  const currentBearingDistance = distance - startPoint.distance
+  const tourersCurrentRoute = findTourersCurrentRoute(distance, routes)
+  const distanceIntoRoute = distance - tourersCurrentRoute.start
+  const startPoint = findTourerStartingPoint(distanceIntoRoute, tourersCurrentRoute)
+
+  const currentBearingDistance = distanceIntoRoute - startPoint.distance
   const lat = toRad(startPoint.lat) || 0
   const lng = toRad(startPoint.lng) || 0
   const bearing = toRad(startPoint.bearing) || 0
@@ -210,9 +216,9 @@ class Map extends React.Component {
     return global.L.divIcon(icon)
   }
 
-  updateTourer (tourer, points = []) {
+  updateTourer (tourer, routes = []) {
     const { marker, popup = {}, distance } = tourer
-    const point = calcTourerPosition(distance, points)
+    const point = calcTourerPosition(distance, routes)
     const icon = this.iconForTourer(tourer)
     marker.setPopupContent(popup.content)
     marker.setLatLng(point)
@@ -229,30 +235,24 @@ class Map extends React.Component {
     focusMode = this.props.focusMode,
     zoom = this.props.zoom
   ) {
-    const points = routes.reduce((acc, route) => (
-      acc.concat(route.points.map((p) => ({
-        ...p,
-        distance: p.distance + (last(acc) || { distance: 0 }).distance
-      })))
-    ), [])
-
+    const combinedRoutes = this.combineRoutes(routes)
     this._tourers = nextTourers.map((nextTourer) => {
       const existingTourer = find(this._tourers, (t) => t.id === nextTourer.id)
       if (!existingTourer) {
-        return this.createTourer(nextTourer, points, selected, focusMode, zoom)
+        return this.createTourer(nextTourer, combinedRoutes, selected, focusMode, zoom)
       } else {
         return this.updateTourer({
           ...existingTourer,
           ...nextTourer,
           marker: existingTourer.marker
-        }, points)
+        }, combinedRoutes)
       }
     })
   }
 
-  createTourer (tourer = {}, points = [], selected, focusMode, zoom = 10) {
+  createTourer (tourer = {}, routes = [], selected, focusMode, zoom = 10) {
     const { distance, popup } = tourer
-    const point = calcTourerPosition(distance, points)
+    const point = calcTourerPosition(distance, routes)
     const icon = this.iconForTourer(tourer)
     const marker = global.L.marker(point, { icon })
 
@@ -284,16 +284,22 @@ class Map extends React.Component {
 
   createTourers () {
     const { tourers = [], routes = [], selected, focusMode, zoom } = this.props
-    const points = routes.reduce((acc, route) => (
-      acc.concat(route.points.map((p) => ({
-        ...p,
-        distance: p.distance + (last(acc) || { distance: 0 }).distance
-      })))
-    ), [])
-
+    const combinedRoutes = this.combineRoutes(routes)
     this._tourers = tourers.map(
-      (tourer) => this.createTourer(tourer, points, selected, focusMode, zoom)
+      (tourer) => this.createTourer(tourer, combinedRoutes, selected, focusMode, zoom)
     )
+  }
+
+  combineRoutes (routes) {
+    return routes.map((route, index) => {
+      const prevRoutes = routes.slice(0, index)
+      const prevTotal = prevRoutes.reduce((total, route) => total + route.distance, 0)
+      return {
+        ...route,
+        start: prevTotal,
+        total: prevTotal + route.distance
+      }
+    })
   }
 
   renderWaypoints (routes = []) {
