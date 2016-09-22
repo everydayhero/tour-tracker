@@ -31,7 +31,7 @@ const findTourersCurrentRoute = (distance, routes) => (
 const calcTourerPosition = (distance, routes) => {
   const firstPoint = first((first(routes) || {}).points) || NullPoint
   const finalPoint = last((last(routes) || {}).points) || NullPoint
-  const routeTotal = last(routes).total
+  const routeTotal = last(routes).start + last(routes).distance
 
   if (distance <= 0) return firstPoint
   if (distance >= routeTotal) return finalPoint
