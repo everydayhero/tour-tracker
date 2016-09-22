@@ -94,8 +94,5 @@ const buildUrl = ({ waypoints = [] }) => `https://router.project-osrm.org/route/
 
 export const findRoute = ({ waypoints = [] }) => (
   axios(buildUrl({ waypoints }))
-    .then(({ data }) => ({
-      points: polylineToPoints(data.routes[0].geometry),
-      distance: data.routes[0].distance
-    }))
+    .then(({ data }) => polylineToPoints(data.routes[0].geometry))
 )

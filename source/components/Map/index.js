@@ -25,7 +25,7 @@ const findTourerStartingPoint = (distance, route) => (
 )
 
 const findTourersCurrentRoute = (distance, routes) => (
-  find(routes, (route, index) => distance < route.total)
+  find(routes, (route, index) => distance < (route.start + route.distance))
 )
 
 const calcTourerPosition = (distance, routes) => {
@@ -293,11 +293,11 @@ class Map extends React.Component {
   combineRoutes (routes) {
     return routes.map((route, index) => {
       const prevRoutes = routes.slice(0, index)
-      const prevTotal = prevRoutes.reduce((total, route) => total + route.distance, 0)
+      const prevTotal = prevRoutes.reduce((total, route) => total + last(route.points).distance, 0)
       return {
         ...route,
-        start: prevTotal,
-        total: prevTotal + route.distance
+        distance: last(route.points).distance,
+        start: prevTotal
       }
     })
   }
