@@ -18,10 +18,11 @@ const US_WAYPOINTS = [
   { lat: 40.7128, lng: -74.0059}
 ]
 
-const TOURERS = [
-  { id: '1', distance: 1000000 },
-  { id: '2', distance: 6000000 }
-]
+// want to test with a lot of riders on the route
+const TOURERS = Array.apply(null, Array(100)).map((item, index) => ({
+  id: `${index}`,
+  distance: 500000 * index
+}))
 
 const INITIAL_STATE = {
   routes: [
