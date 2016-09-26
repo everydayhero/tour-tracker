@@ -9,7 +9,6 @@ import { toRad, toDeg, first, last } from '../../utils'
 
 const NullPoint = {
   distance: 0,
-  bearing: 0,
   lat: 0,
   lng: 0
 }
@@ -24,9 +23,34 @@ const findTourerStartingPoint = (distance, route) => (
   }) || NullPoint
 )
 
+const findTourerNextPoint = (currentRoute, currentPoint) => {
+  const nextIndex = currentRoute.points.indexOf(currentPoint) + 1
+  console.log('nextIndex', nextIndex)
+  console.log('currentPoint', currentPoint)
+  if (!nextIndex || nextIndex === currentRoute.points.length) {
+    return undefined
+  } else {
+    return currentRoute.points[nextIndex]
+  }
+}
+
 const findTourersCurrentRoute = (distance, routes) => (
   find(routes, (route, index) => distance < (route.start + route.distance))
 )
+
+const calculateBearing = (fromPoint, toPoint) => {
+  const fromLat = toRad(fromPoint.lat)
+  const fromLng = toRad(fromPoint.lng)
+  const toLat = toRad(toPoint.lat)
+  const toLng = toRad(toPoint.lng)
+
+  return toDeg(
+    Math.atan2(
+      Math.cos(toLat) * Math.sin(toLng - fromLng),
+      Math.cos(fromLat) * Math.sin(toLat) - Math.sin(fromLat) * Math.cos(toLat) * Math.cos(toLng - fromLng)
+    )
+  )
+}
 
 const calcTourerPosition = (distance, routes) => {
   const firstPoint = first((first(routes) || {}).points) || NullPoint
@@ -39,11 +63,12 @@ const calcTourerPosition = (distance, routes) => {
   const tourersCurrentRoute = findTourersCurrentRoute(distance, routes)
   const distanceIntoRoute = distance - tourersCurrentRoute.start
   const startPoint = findTourerStartingPoint(distanceIntoRoute, tourersCurrentRoute)
+  const nextPoint = findTourerNextPoint(tourersCurrentRoute, startPoint)
 
   const currentBearingDistance = distanceIntoRoute - startPoint.distance
   const lat = toRad(startPoint.lat) || 0
   const lng = toRad(startPoint.lng) || 0
-  const bearing = toRad(startPoint.bearing) || 0
+  const bearing = startPoint && nextPoint ? toRad(calculateBearing(startPoint, nextPoint)) : 0
   const angularDistance = currentBearingDistance / EARTHS_RADIUS_IN_METERS
 
   const tourerLat = Math.asin(
@@ -402,7 +427,6 @@ Map.propTypes = {
         PropTypes.shape({
           x: PropTypes.number,
           y: PropTypes.number,
-          bearing: PropTypes.number,
           distance: PropTypes.number
         })
       ),

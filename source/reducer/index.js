@@ -12,6 +12,8 @@ const updateItem = (collection, index, attributes) => ([
   ...collection.slice(index + 1)
 ])
 
+const reducePoints = (points) => points.map(({ lat, lng, distance }) => ({ lat, lng, distance }))
+
 const requestRoute = (state, { index }) => ({
   ...state,
   routes: updateItem(state.routes, index, { status: 'fetching' })
@@ -24,7 +26,7 @@ const receiveRouteFailure = (state, { index, error }) => ({
 
 const receiveRouteSuccess = (state, { index, points }) => ({
   ...state,
-  routes: updateItem(state.routes, index, { status: 'fetched', error: '', points })
+  routes: updateItem(state.routes, index, { status: 'fetched', error: '', points: reducePoints(points) })
 })
 
 const selectTourer = (state, { id }) => ({
