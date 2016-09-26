@@ -2,27 +2,37 @@ import React, { PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 import { renderToStaticMarkup } from 'react-dom/server'
 import find from 'lodash/find'
+import forEach from 'lodash/forEach'
 
 import { Checkerboard, Pin } from '../../icons'
 import { EARTHS_RADIUS_IN_METERS } from '../../constants'
-import { toRad, toDeg, first, last } from '../../utils'
+import { toRad, toDeg, first, last, calcBearing, calcDistance } from '../../utils'
 
 const NullPoint = {
   distance: 0,
-  bearing: 0,
   lat: 0,
   lng: 0
 }
 
-const findTourerStartingPoint = (distance, route) => (
-  find(route.points, (point, index) => {
-    const next = route.points[index + 1] || { distance: 0 }
-    return (
-      (distance > point.distance) &&
-      (distance < next.distance)
-    )
-  }) || NullPoint
-)
+const findTourerStartingPoint = (distance, { points }) => {
+  let total = 0
+
+  for (let i = 0; i < points.length - 1; i++) {
+    total += calcDistance(points[i], points[i + 1])
+    if (distance < total) {
+      return {
+        startPoint: points[i],
+        nextPoint: points[i + 1],
+        currentBearingDistance: total - distance
+      }
+    }
+  }
+
+  return {
+    startPoint: last(points),
+    currentBearingDistance: 0
+  }
+}
 
 const findTourersCurrentRoute = (distance, routes) => (
   find(routes, (route, index) => distance < (route.start + route.distance))
@@ -38,12 +48,12 @@ const calcTourerPosition = (distance, routes) => {
 
   const tourersCurrentRoute = findTourersCurrentRoute(distance, routes)
   const distanceIntoRoute = distance - tourersCurrentRoute.start
-  const startPoint = findTourerStartingPoint(distanceIntoRoute, tourersCurrentRoute)
+  const { startPoint, nextPoint, currentBearingDistance } = findTourerStartingPoint(distanceIntoRoute, tourersCurrentRoute)
 
-  const currentBearingDistance = distanceIntoRoute - startPoint.distance
   const lat = toRad(startPoint.lat) || 0
   const lng = toRad(startPoint.lng) || 0
-  const bearing = toRad(startPoint.bearing) || 0
+
+  const bearing = startPoint && nextPoint ? toRad(calcBearing(startPoint, nextPoint)) : 0
   const angularDistance = currentBearingDistance / EARTHS_RADIUS_IN_METERS
 
   const tourerLat = Math.asin(
@@ -291,10 +301,9 @@ class Map extends React.Component {
   combineRoutes (routes) {
     return routes.map((route, index) => {
       const prevRoutes = routes.slice(0, index)
-      const prevTotal = prevRoutes.reduce((total, route) => total + last(route.points).distance, 0)
+      const prevTotal = prevRoutes.reduce((total, route) => total + route.distance, 0)
       return {
         ...route,
-        distance: last(route.points).distance,
         start: prevTotal
       }
     })
@@ -402,7 +411,6 @@ Map.propTypes = {
         PropTypes.shape({
           x: PropTypes.number,
           y: PropTypes.number,
-          bearing: PropTypes.number,
           distance: PropTypes.number
         })
       ),

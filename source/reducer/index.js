@@ -22,9 +22,9 @@ const receiveRouteFailure = (state, { index, error }) => ({
   routes: updateItem(state.routes, index, { status: 'failed', error })
 })
 
-const receiveRouteSuccess = (state, { index, points }) => ({
+const receiveRouteSuccess = (state, { index, points, distance }) => ({
   ...state,
-  routes: updateItem(state.routes, index, { status: 'fetched', error: '', points })
+  routes: updateItem(state.routes, index, { status: 'fetched', error: '', points, distance })
 })
 
 const selectTourer = (state, { id }) => ({
