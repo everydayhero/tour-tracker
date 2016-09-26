@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 import { renderToStaticMarkup } from 'react-dom/server'
 import find from 'lodash/find'
+import forEach from 'lodash/forEach'
 
 import { Checkerboard, Pin } from '../../icons'
 import { EARTHS_RADIUS_IN_METERS } from '../../constants'
@@ -13,25 +14,24 @@ const NullPoint = {
   lng: 0
 }
 
-const findTourerStartingPoint = (distance, route) => (
-  find(route.points, (point, index) => {
-    // @todo use memoization to store these distance calculations
-    if (!point.distance) {
-      const previousPoint = route.points[index - 1]
-      point.distance = previousPoint ? previousPoint.distance + calcDistance(previousPoint, point) : 0
+const findTourerStartingPoint = (distance, { points }) => {
+  let total = 0
+  
+  for (let i = 0; i < points.length - 1; i++) {
+    total += calcDistance(points[i], points[i + 1])
+    if (distance < total) {
+      return {
+        startPoint: points[i],
+        currentBearingDistance: total - distance
+      }
     }
+  }
 
-    const nextPoint = route.points[index + 1]
-    if (nextPoint && !nextPoint.distance) {
-      nextPoint.distance = point.distance + calcDistance(point, nextPoint)
-    }
-
-    return (
-      (distance > point.distance) &&
-      (nextPoint && distance < nextPoint.distance)
-    )
-  }) || NullPoint
-)
+  return {
+    startPoint: last(points),
+    currentBearingDistance: 0
+  }
+}
 
 const findTourerNextPoint = (currentRoute, currentPoint) => {
   const nextIndex = currentRoute.points.indexOf(currentPoint) + 1
@@ -56,10 +56,9 @@ const calcTourerPosition = (distance, routes) => {
 
   const tourersCurrentRoute = findTourersCurrentRoute(distance, routes)
   const distanceIntoRoute = distance - tourersCurrentRoute.start
-  const startPoint = findTourerStartingPoint(distanceIntoRoute, tourersCurrentRoute)
+  const { startPoint, currentBearingDistance } = findTourerStartingPoint(distanceIntoRoute, tourersCurrentRoute)
   const nextPoint = findTourerNextPoint(tourersCurrentRoute, startPoint)
 
-  const currentBearingDistance = distanceIntoRoute - startPoint.distance
   const lat = toRad(startPoint.lat) || 0
   const lng = toRad(startPoint.lng) || 0
 
