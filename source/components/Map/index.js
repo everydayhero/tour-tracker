@@ -16,12 +16,13 @@ const NullPoint = {
 
 const findTourerStartingPoint = (distance, { points }) => {
   let total = 0
-  
+
   for (let i = 0; i < points.length - 1; i++) {
     total += calcDistance(points[i], points[i + 1])
     if (distance < total) {
       return {
         startPoint: points[i],
+        nextPoint: points[i + 1],
         currentBearingDistance: total - distance
       }
     }
@@ -30,15 +31,6 @@ const findTourerStartingPoint = (distance, { points }) => {
   return {
     startPoint: last(points),
     currentBearingDistance: 0
-  }
-}
-
-const findTourerNextPoint = (currentRoute, currentPoint) => {
-  const nextIndex = currentRoute.points.indexOf(currentPoint) + 1
-  if (!nextIndex || nextIndex === currentRoute.points.length) {
-    return undefined
-  } else {
-    return currentRoute.points[nextIndex]
   }
 }
 
@@ -56,8 +48,7 @@ const calcTourerPosition = (distance, routes) => {
 
   const tourersCurrentRoute = findTourersCurrentRoute(distance, routes)
   const distanceIntoRoute = distance - tourersCurrentRoute.start
-  const { startPoint, currentBearingDistance } = findTourerStartingPoint(distanceIntoRoute, tourersCurrentRoute)
-  const nextPoint = findTourerNextPoint(tourersCurrentRoute, startPoint)
+  const { startPoint, nextPoint, currentBearingDistance } = findTourerStartingPoint(distanceIntoRoute, tourersCurrentRoute)
 
   const lat = toRad(startPoint.lat) || 0
   const lng = toRad(startPoint.lng) || 0
