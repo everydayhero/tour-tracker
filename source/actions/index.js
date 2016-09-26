@@ -12,9 +12,9 @@ const requestRoute = (index) => ({
   payload: { index }
 })
 
-const receiveRouteSuccess = (index, points) => ({
+const receiveRouteSuccess = (index, { points, distance }) => ({
   type: RECEIVE_ROUTE_SUCCESS,
-  payload: { index, points }
+  payload: { index, points, distance }
 })
 
 const receiveRouteFailure = (index, error) => ({

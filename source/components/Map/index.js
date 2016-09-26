@@ -5,7 +5,7 @@ import find from 'lodash/find'
 
 import { Checkerboard, Pin } from '../../icons'
 import { EARTHS_RADIUS_IN_METERS } from '../../constants'
-import { toRad, toDeg, first, last } from '../../utils'
+import { toRad, toDeg, first, last, calcBearing, calcDistance } from '../../utils'
 
 const NullPoint = {
   distance: 0,
@@ -15,10 +15,20 @@ const NullPoint = {
 
 const findTourerStartingPoint = (distance, route) => (
   find(route.points, (point, index) => {
-    const next = route.points[index + 1] || { distance: 0 }
+    // @todo use memoization to store these distance calculations
+    if (!point.distance) {
+      const previousPoint = route.points[index - 1]
+      point.distance = previousPoint ? previousPoint.distance + calcDistance(previousPoint, point) : 0
+    }
+
+    const nextPoint = route.points[index + 1]
+    if (nextPoint && !nextPoint.distance) {
+      nextPoint.distance = point.distance + calcDistance(point, nextPoint)
+    }
+
     return (
       (distance > point.distance) &&
-      (distance < next.distance)
+      (nextPoint && distance < nextPoint.distance)
     )
   }) || NullPoint
 )
@@ -36,20 +46,6 @@ const findTourersCurrentRoute = (distance, routes) => (
   find(routes, (route, index) => distance < (route.start + route.distance))
 )
 
-const calculateBearing = (fromPoint, toPoint) => {
-  const fromLat = toRad(fromPoint.lat)
-  const fromLng = toRad(fromPoint.lng)
-  const toLat = toRad(toPoint.lat)
-  const toLng = toRad(toPoint.lng)
-
-  return toDeg(
-    Math.atan2(
-      Math.cos(toLat) * Math.sin(toLng - fromLng),
-      Math.cos(fromLat) * Math.sin(toLat) - Math.sin(fromLat) * Math.cos(toLat) * Math.cos(toLng - fromLng)
-    )
-  )
-}
-
 const calcTourerPosition = (distance, routes) => {
   const firstPoint = first((first(routes) || {}).points) || NullPoint
   const finalPoint = last((last(routes) || {}).points) || NullPoint
@@ -66,7 +62,8 @@ const calcTourerPosition = (distance, routes) => {
   const currentBearingDistance = distanceIntoRoute - startPoint.distance
   const lat = toRad(startPoint.lat) || 0
   const lng = toRad(startPoint.lng) || 0
-  const bearing = startPoint && nextPoint ? toRad(calculateBearing(startPoint, nextPoint)) : 0
+
+  const bearing = startPoint && nextPoint ? toRad(calcBearing(startPoint, nextPoint)) : 0
   const angularDistance = currentBearingDistance / EARTHS_RADIUS_IN_METERS
 
   const tourerLat = Math.asin(
@@ -314,10 +311,9 @@ class Map extends React.Component {
   combineRoutes (routes) {
     return routes.map((route, index) => {
       const prevRoutes = routes.slice(0, index)
-      const prevTotal = prevRoutes.reduce((total, route) => total + last(route.points).distance, 0)
+      const prevTotal = prevRoutes.reduce((total, route) => total + route.distance, 0)
       return {
         ...route,
-        distance: last(route.points).distance,
         start: prevTotal
       }
     })

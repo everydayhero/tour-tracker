@@ -70,9 +70,10 @@ const createSampleMap = (args = {}) => {
           [0, 50]
         ],
         points: [
-          { lat: 0, lng: 0, distance: 0 },
-          { lat: 0, lng: 50, distance: 5560000 }
-        ]
+          { lat: 0, lng: 0 },
+          { lat: 0, lng: 50 }
+        ],
+        distance: 5560000
       }
     ],
     tourers = [
@@ -227,9 +228,10 @@ describe('Map', () => {
             [0, 50]
           ],
           points: [
-            { lat: 0, lng: 0, distance: 0 },
-            { lat: 0, lng: 50, distance: 5560000 }
-          ]
+            { lat: 0, lng: 0 },
+            { lat: 0, lng: 50 }
+          ],
+          distance: 5560000
         },
         {
           waypoints: [
@@ -237,9 +239,10 @@ describe('Map', () => {
             [0, 150]
           ],
           points: [
-            { lat: 0, lng: 100, distance: 0 },
-            { lat: 0, lng: 150, distance: 5560000 }
-          ]
+            { lat: 0, lng: 100 },
+            { lat: 0, lng: 150 }
+          ],
+          distance: 5560000
         }
       ],
       tourers: [
