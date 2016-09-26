@@ -25,8 +25,6 @@ const findTourerStartingPoint = (distance, route) => (
 
 const findTourerNextPoint = (currentRoute, currentPoint) => {
   const nextIndex = currentRoute.points.indexOf(currentPoint) + 1
-  console.log('nextIndex', nextIndex)
-  console.log('currentPoint', currentPoint)
   if (!nextIndex || nextIndex === currentRoute.points.length) {
     return undefined
   } else {
