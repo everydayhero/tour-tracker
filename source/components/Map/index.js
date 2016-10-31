@@ -15,16 +15,19 @@ const NullPoint = {
 }
 
 const findTourerStartingPoint = (distance, { points }) => {
-  let total = 0
+  let distanceFromCurrentPoint = distance
 
   for (let i = 0; i < points.length - 1; i++) {
-    total += calcDistance(points[i], points[i + 1])
-    if (distance < total) {
+    const segmentDistance = calcDistance(points[i], points[i + 1])
+
+    if (distanceFromCurrentPoint < segmentDistance) {
       return {
         startPoint: points[i],
         nextPoint: points[i + 1],
-        currentBearingDistance: total - distance
+        currentBearingDistance: distanceFromCurrentPoint
       }
+    } else {
+      distanceFromCurrentPoint -= segmentDistance
     }
   }
 
