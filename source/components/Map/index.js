@@ -227,7 +227,13 @@ class Map extends React.Component {
     return global.L.divIcon(icon)
   }
 
-  updateTourer (tourer, routes = []) {
+  focusOnTourer (point, zoom = 10) {
+    this._map.fitBounds([
+      point
+    ], { maxZoom: zoom })
+  }
+
+  updateTourer (tourer, routes = [], selected, focusMode, zoom) {
     const { marker, popup = {}, distance } = tourer
     const point = calcTourerPosition(distance, routes)
     const icon = this.iconForTourer(tourer)
@@ -235,6 +241,10 @@ class Map extends React.Component {
     marker.setLatLng(point)
     marker.setIcon(icon)
     marker.tourer_id = tourer.id
+
+    if (focusMode === 'selected' && tourer.id === selected) {
+      this.focusOnTourer(point, zoom)
+    }
 
     return { ...tourer }
   }
@@ -252,16 +262,17 @@ class Map extends React.Component {
       if (!existingTourer) {
         return this.createTourer(nextTourer, combinedRoutes, selected, focusMode, zoom)
       } else {
-        return this.updateTourer({
+        const tourer = {
           ...existingTourer,
           ...nextTourer,
           marker: existingTourer.marker
-        }, combinedRoutes)
+        }
+        return this.updateTourer(tourer, combinedRoutes, selected, focusMode, zoom)
       }
     })
   }
 
-  createTourer (tourer = {}, routes = [], selected, focusMode, zoom = 10) {
+  createTourer (tourer = {}, routes = [], selected, focusMode, zoom) {
     const { distance, popup } = tourer
     const point = calcTourerPosition(distance, routes)
     const icon = this.iconForTourer(tourer)
@@ -282,9 +293,7 @@ class Map extends React.Component {
     this._markers.addLayer(marker)
 
     if (focusMode === 'selected' && tourer.id === selected) {
-      this._map.fitBounds([
-        point
-      ], { maxZoom: zoom })
+      this.focusOnTourer(point, zoom)
     }
 
     return {
