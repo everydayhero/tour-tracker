@@ -2,7 +2,6 @@ import React, { PropTypes } from 'react'
 import ReactDOM from 'react-dom'
 import { renderToStaticMarkup } from 'react-dom/server'
 import find from 'lodash/find'
-import forEach from 'lodash/forEach'
 
 import { Checkerboard, Pin } from '../../icons'
 import { EARTHS_RADIUS_IN_METERS } from '../../constants'
@@ -193,7 +192,6 @@ class Map extends React.Component {
         this.renderRouteConnections()
         this.createTourers()
       }
-
     }
   }
 
@@ -406,7 +404,7 @@ class Map extends React.Component {
           ...paths,
           [last(routes[index - 1].waypoints), first(routes[index].waypoints)]
         ] : paths
-      ), []);
+      ), [])
       connectorPaths.map(path => global.L.polyline(path, connectorStyles).addTo(this._map))
     }
   }
